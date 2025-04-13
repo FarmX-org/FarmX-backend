@@ -17,11 +17,11 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 
-public class UserEntity {
+public class UserEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String username;
 
@@ -30,15 +30,17 @@ public class UserEntity {
     private String city;   
     private String street;  
 	private String password;
+    private String email;
+
 	
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles = new ArrayList<>();
-	public int getId() {
+	public Long  getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(Long  id) {
 		this.id = id;
 	}
 	public String getUsername() {
@@ -83,6 +85,12 @@ public class UserEntity {
 	}
 	public void setStreet(String street) {
 		this.street = street;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 	
