@@ -1,35 +1,18 @@
 package io.farmx.controller;
+
 import io.farmx.dto.FarmDTO;
 import io.farmx.service.FarmService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "*")
+@RequestMapping("/farms")
 public class FarmController {
-    @GetMapping("/hello")
-    public Map<String, String> sayHello(@RequestParam String name) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Hello " + name);
-        return response;
-    }
-    @PostMapping("/hello-body")
-    public Map<String, String> sayHelloPost(@RequestBody Map<String, String> requestBody) {
-        String name = requestBody.get("name");
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Hello " + name);
-        return response;
-    }
 
     private final FarmService farmService;
 
@@ -37,20 +20,45 @@ public class FarmController {
         this.farmService = farmService;
     }
 
-    @GetMapping("/farms/my")
-    public List<FarmDTO> getMyFarms(Principal principal) {
-        return farmService.getMyFarms(principal);
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @GetMapping
+    public ResponseEntity<List<FarmDTO>> getFarms(Principal principal) {
+        List<FarmDTO> farms = farmService.getFarms(principal);
+        return ResponseEntity.ok(farms);
     }
 
-    @PostMapping("/farms")
-    public FarmDTO create(@RequestBody FarmDTO dto, Principal principal) {
-        return farmService.createFarm(dto, principal);
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<FarmDTO> getFarmById(@PathVariable Long id, Principal principal) {
+        FarmDTO farm = farmService.getFarmById(id, principal);
+        return ResponseEntity.ok(farm);
     }
 
-    @DeleteMapping("/farms/{id}")
-    public void delete(@PathVariable Long id, Principal principal) {
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @PostMapping
+    public ResponseEntity<FarmDTO> createFarm(@RequestBody FarmDTO dto, Principal principal) {
+        FarmDTO createdFarm = farmService.createFarm(dto, principal);
+        return ResponseEntity.ok(createdFarm);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<FarmDTO> updateFarm(@PathVariable Long id, @RequestBody FarmDTO dto, Principal principal) {
+        FarmDTO updatedFarm = farmService.updateFarm(id, dto, principal);
+        return ResponseEntity.ok(updatedFarm);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFarm(@PathVariable Long id, Principal principal) {
         farmService.deleteFarm(id, principal);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','FARMER')")
+    @PostMapping("/{id}/rate")
+    public ResponseEntity<FarmDTO> rateFarm(@PathVariable Long id, @RequestParam double rating) {
+        FarmDTO ratedFarm = farmService.rateFarm(id, rating);
+        return ResponseEntity.ok(ratedFarm);
     }
 }
-
-

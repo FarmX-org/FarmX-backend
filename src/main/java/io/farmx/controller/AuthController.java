@@ -21,6 +21,8 @@ import io.farmx.config.JWTGenerator;
 import io.farmx.dto.AuthResponseDTO;
 import io.farmx.dto.LoginDto;
 import io.farmx.dto.SignUpDto;
+import io.farmx.model.Consumer;
+import io.farmx.model.Farmer;
 import io.farmx.model.Role;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.RoleRepository;
@@ -81,36 +83,48 @@ public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDto loginDto, Htt
     return new ResponseEntity<>(new AuthResponseDTO(token, roles), HttpStatus.OK);
 }
 
-
-
-    @PostMapping("signup")
-    public ResponseEntity<String> signUp(@RequestBody SignUpDto signUpDto) {
-
-        if (userRepository.existsByUsername(signUpDto.getUsername())) {
-        	 logger.warn("Username is already taken: {}", signUpDto.getUsername());
-        	 throw new RuntimeException("Username is already taken!");
-        }
-
-
-        UserEntity user = new UserEntity();
-        user.setUsername(signUpDto.getUsername());
-        user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-
-        user.setName(signUpDto.getName());
-        user.setPhone(signUpDto.getPhone());
-        user.setCity(signUpDto.getCity());
-        user.setStreet(signUpDto.getStreet());
-
-      
-        Role roles = roleRepository.findByName("User")
-                .orElseThrow(() -> new RuntimeException("Role 'User' not found"));
-        user.setRoles(Collections.singletonList(roles));
-
-   
-        userRepository.save(user);
-        logger.info("User successfully registered: {}", signUpDto.getUsername());
-        return new ResponseEntity<>("User registered successfully!",  HttpStatus.CREATED);
+@PostMapping("signup")
+public ResponseEntity<String> signUp(@RequestBody SignUpDto signUpDto) {
+  if (userRepository.existsByUsername(signUpDto.getUsername())) {
+        logger.warn("Username is already taken: {}", signUpDto.getUsername());
+        return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
     }
+
+    if (userRepository.existsByEmail(signUpDto.getEmail())) {
+        logger.warn("Email is already taken: {}", signUpDto.getEmail());
+        return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+    }
+   String roleName = signUpDto.getRole();
+    if (roleName == null || 
+        (!roleName.equalsIgnoreCase("Farmer") && !roleName.equalsIgnoreCase("Consumer"))) {
+        logger.warn("Invalid role provided: {}", roleName);
+        return new ResponseEntity<>("Invalid role. Must be either 'Farmer' or 'Consumer'.", HttpStatus.BAD_REQUEST);
+    }
+  UserEntity user;
+
+    if (roleName.equalsIgnoreCase("Farmer")) {
+        user = new Farmer();
+    } else {
+        Consumer consumer = new Consumer();  
+        user = consumer;
+    }
+    user.setUsername(signUpDto.getUsername());
+    user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+    user.setName(signUpDto.getName());
+    user.setPhone(signUpDto.getPhone());
+    user.setCity(signUpDto.getCity());
+    user.setStreet(signUpDto.getStreet());
+    user.setEmail(signUpDto.getEmail());
+
+        Role role = roleRepository.findByName(roleName)
+            .orElseThrow(() -> new RuntimeException("Role '" + roleName + "' not found"));
+    user.setRoles(Collections.singletonList(role));
+
+    userRepository.save(user);
+
+    logger.info("User successfully registered: {} with role: {}", signUpDto.getUsername(), roleName);
+    return new ResponseEntity<>("User registered successfully!", HttpStatus.CREATED);
+}
 
 }
 

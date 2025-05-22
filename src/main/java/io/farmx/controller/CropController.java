@@ -39,9 +39,9 @@ public class CropController {
         service.deleteCrop(id);
     }
 
-    @GetMapping
+   /* @GetMapping
     public ResponseEntity<List<CropDto>> getAllCrops(Principal principal) {
         String name = principal.getName();   
         return ResponseEntity.ok(service.getCropsForCurrentUser(name));
-    }
+    }*/
 }
