@@ -7,8 +7,17 @@ public class SignUpDto {
     private String phone;
     private String city;
     private String street;
+    private String role;
+    private String email;  
 
- 
+  
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
     public String getUsername() {
         return username;
     }
@@ -56,5 +65,14 @@ public class SignUpDto {
     public void setStreet(String street) {
         this.street = street;
     }
+    
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }
 

@@ -59,8 +59,8 @@ public class CropService {
         cropRepo.deleteById(id);
     }
 
-    public List<CropDto> getCropsForCurrentUser(String name) {
-        UserEntity user = userRepo.findByUsername(name).orElseThrow();
+   /* public List<CropDto> getCropsForCurrentUser(String name) {
+       /* UserEntity user = userRepo.findByUsername(name).orElseThrow();
         List<Farm> farms = farmRepo.findAllByUser(user);
         
         return farms.stream()
@@ -68,7 +68,7 @@ public class CropService {
                     .map(this::toDTO)
                     .collect(Collectors.toList());
     }
-
+*/
     
 
     private CropDto toDTO(Crop crop) {
