@@ -1,8 +1,12 @@
 package io.farmx.controller;
 
-import io.farmx.dto.CropDto;
+import io.farmx.dto.CropDTO;
 import io.farmx.service.CropService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -13,35 +17,33 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class CropController {
 
-    private final CropService service;
+	@Autowired 
+    private CropService cropService;
 
-    public CropController(CropService service) {
-        this.service = service;
-    }
 
-    @GetMapping("/farm/{farmId}")
-    public List<CropDto> getByFarm(@PathVariable Long farmId) {
-        return service.getCropsByFarm(farmId);
-    }
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
-    public CropDto create(@RequestBody CropDto crop) {
-        return service.saveCrop(crop);
+    public CropDTO create(@RequestBody CropDTO dto) {
+        return cropService.createCrop(dto);
     }
 
+    @GetMapping
+    public List<CropDTO> getAll() {
+        return cropService.getAllCrops();
+    }
+
+    @GetMapping("/{id}")
+    public CropDTO getById(@PathVariable Long id) {
+        return cropService.getCropById(id);
+    }
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
-    public CropDto update(@PathVariable Long id, @RequestBody CropDto crop) {
-        return service.updateCrop(id, crop);
+    public CropDTO update(@PathVariable Long id, @RequestBody CropDTO dto) {
+        return cropService.updateCrop(id, dto);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.deleteCrop(id);
+    	cropService.deleteCrop(id);
     }
-
-   /* @GetMapping
-    public ResponseEntity<List<CropDto>> getAllCrops(Principal principal) {
-        String name = principal.getName();   
-        return ResponseEntity.ok(service.getCropsForCurrentUser(name));
-    }*/
 }

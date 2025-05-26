@@ -3,110 +3,81 @@ package io.farmx.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "crop")
+@Table(name = "crops")
 public class Crop {
-	  @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long id;
-	    private String name;
-	    private String category;
-	    private double price;
-	    private int quantity;
 
-	    @ManyToOne
-	    @JoinColumn(name = "farm_id")
-	    private Farm farm;
-	    
-	    @Column(length = 500)
-	    private String description;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	    private String harvestDate;
+    private String name;
 
-	    private boolean available;
+    private String category;
 
-	    private String imageUrl;
+    @Column(length = 500)
+    private String description;
 
-	    // Getters and Setters
+    private String season; 
 
-	    public Long getId() {
-	        return id;
-	    }
+    private int growthDays;
 
-	    public void setId(Long id) {
-	        this.id = id;
-	    }
+    private double averagePrice;
 
-	    public String getName() {
-	        return name;
-	    }
+    // Getters & Setters
 
-	    public void setName(String name) {
-	        this.name = name;
-	    }
+    public Long getId() {
+        return id;
+    }
 
-	    public String getCategory() {
-	        return category;
-	    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	    public void setCategory(String category) {
-	        this.category = category;
-	    }
+    public String getName() {
+        return name;
+    }
 
-	    public double getPrice() {
-	        return price;
-	    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	    public void setPrice(double price) {
-	        this.price = price;
-	    }
+    public String getCategory() {
+        return category;
+    }
 
-	    public int getQuantity() {
-	        return quantity;
-	    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
-	    public void setQuantity(int quantity) {
-	        this.quantity = quantity;
-	    }
+    public String getDescription() {
+        return description;
+    }
 
-	    public Farm getFarm() {
-	        return farm;
-	    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	    public void setFarm(Farm farm) {
-	        this.farm = farm;
-	    }
+    public String getSeason() {
+        return season;
+    }
 
-		public String getHarvestDate() {
-			return harvestDate;
-		}
+    public void setSeason(String season) {
+        this.season = season;
+    }
 
-		public void setHarvestDate(String harvestDate) {
-			this.harvestDate = harvestDate;
-		}
+    public int getGrowthDays() {
+        return growthDays;
+    }
 
-		public boolean isAvailable() {
-			return available;
-		}
+    public void setGrowthDays(int growthDays) {
+        this.growthDays = growthDays;
+    }
 
-		public void setAvailable(boolean available) {
-			this.available = available;
-		}
+    public double getAveragePrice() {
+        return averagePrice;
+    }
 
-		public String getImageUrl() {
-			return imageUrl;
-		}
-
-		public void setImageUrl(String imageUrl) {
-			this.imageUrl = imageUrl;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public void setDescription(String description) {
-			this.description = description;
-		}
-	
-
+    public void setAveragePrice(double averagePrice) {
+        this.averagePrice = averagePrice;
+    }
 }
