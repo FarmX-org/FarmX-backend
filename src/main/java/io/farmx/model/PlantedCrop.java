@@ -34,7 +34,9 @@ public class PlantedCrop {
 
     private String status; 
 
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
+
 
     // Getters & Setters
 

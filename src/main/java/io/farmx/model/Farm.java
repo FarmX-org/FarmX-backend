@@ -32,7 +32,8 @@ public class Farm {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
-
+    
+    @Column(columnDefinition = "LONGTEXT")
     private String licenseDocumentUrl;
 
     private double rating = 0.0;
@@ -42,11 +43,11 @@ public class Farm {
     @JoinColumn(name = "farmer_id", nullable = false)
     private Farmer farmer;
 
-    // 👇👇 العلاقة الجديدة مع الـ PlantedCrop
+
     @OneToMany(mappedBy = "farm", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlantedCrop> plantedCrops = new ArrayList<>();
 
-    // Getters and Setters
+
 
     public Long getId() {
         return id;
