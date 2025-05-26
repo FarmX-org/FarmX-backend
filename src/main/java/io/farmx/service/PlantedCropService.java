@@ -1,5 +1,6 @@
 package io.farmx.service;
 
+import io.farmx.dto.FarmCropsDTO;
 import io.farmx.dto.PlantedCropDTO;
 import io.farmx.model.Crop;
 import io.farmx.model.Farm;
@@ -153,6 +154,37 @@ public class PlantedCropService {
         }
 
         plantedCropRepository.delete(existing);
+    }
+
+    public List<FarmCropsDTO> getAllCropsByFarmer(Principal principal) {
+        String username = principal.getName();
+        Farmer farmer = (Farmer) userRepository.findByUsername(username)
+                .orElseThrow(() -> new AccessDeniedException("User not found or not a farmer"));
+
+        List<Farm> farms = farmRepository.findAllByFarmer(farmer);
+
+        
+        return farms.stream().map(farm -> {
+            List<PlantedCropDTO> cropsDtos = plantedCropRepository.findByFarm(farm)
+                .stream()
+                .map(pc -> {
+                    PlantedCropDTO dto = new PlantedCropDTO();
+                    dto.setId(pc.getId());
+                    dto.setCropId(pc.getCrop().getId());
+                    dto.setFarmId(pc.getFarm().getId());
+                    dto.setPlantedDate(pc.getPlantedDate());
+                    dto.setEstimatedHarvestDate(pc.getEstimatedHarvestDate());
+                    dto.setActualHarvestDate(pc.getActualHarvestDate());
+                    dto.setQuantity(pc.getQuantity());
+                    dto.setAvailable(pc.isAvailable());
+                    dto.setNotes(pc.getNotes());
+                    dto.setStatus(pc.getStatus());
+                    dto.setImageUrl(pc.getImageUrl());
+                    return dto;
+                }).collect(Collectors.toList());
+
+            return new FarmCropsDTO(farm.getId(), farm.getName(), cropsDtos);
+        }).collect(Collectors.toList());
     }
 
 

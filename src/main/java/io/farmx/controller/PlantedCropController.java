@@ -1,5 +1,6 @@
 package io.farmx.controller;
 
+import io.farmx.dto.FarmCropsDTO;
 import io.farmx.dto.PlantedCropDTO;
 import io.farmx.service.PlantedCropService;
 
@@ -44,6 +45,13 @@ public class PlantedCropController {
         plantedCropService.deletePlantedCrop(id, principal);
         return ResponseEntity.noContent().build();
     }
+
+        @GetMapping("/by-farmer")
+        public ResponseEntity<List<FarmCropsDTO>> getCropsByFarmer(Principal principal) {
+            List<FarmCropsDTO> result = plantedCropService.getAllCropsByFarmer(principal);
+            return ResponseEntity.ok(result);
+        }
+
 
   
 }
