@@ -23,7 +23,6 @@ public class Crop {
 
     private double averagePrice;
 
-    // Getters & Setters
 
     public Long getId() {
         return id;
