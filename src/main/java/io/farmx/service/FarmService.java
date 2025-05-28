@@ -24,10 +24,12 @@ public class FarmService {
 
     private final FarmRepository farmRepo;
     private final UserRepository userRepo;
+    private final SoilService soilService;
 
-    public FarmService(FarmRepository farmRepo, UserRepository userRepo) {
+    public FarmService(FarmRepository farmRepo, UserRepository userRepo, SoilService soilService) {
         this.farmRepo = farmRepo;
         this.userRepo = userRepo;
+        this.soilService = soilService;
     }
 
     public List<FarmDTO> getFarms(Principal principal) {
@@ -62,6 +64,8 @@ public class FarmService {
     }
 
     public FarmDTO createFarm(FarmDTO dto, Principal principal) {
+    	 String soilTypeFromCoords = soilService.getSoilTypeByCoordinates(dto.getLatitude(), dto.getLongitude());
+    
         String username = principal.getName();
         logger.info("Creating farm '{}' for user '{}'", dto.getName(), username);
 
@@ -78,6 +82,7 @@ public class FarmService {
 
         Farm farm = fromDto(dto);
         farm.setFarmer(farmer);
+        dto.setSoilType(soilTypeFromCoords);
 
         Farm savedFarm = farmRepo.save(farm);
         logger.info("Farm '{}' created successfully with id {}", savedFarm.getName(), savedFarm.getId());
@@ -113,6 +118,8 @@ public class FarmService {
     }
 
     public FarmDTO updateFarm(Long id, FarmDTO dto, Principal principal) {
+    	
+    
         String username = principal.getName();
         logger.info("Updating farm with id {} requested by user '{}'", id, username);
 
@@ -130,7 +137,8 @@ public class FarmService {
 
         boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equalsIgnoreCase("ADMIN"));
         boolean isOwner = (user instanceof Farmer farmer) && farm.getFarmer().getId().equals(farmer.getId());
-
+          String soilTypeFromCoords = soilService.getSoilTypeByCoordinates(dto.getLatitude(), dto.getLongitude());
+          dto.setSoilType(soilTypeFromCoords);
         if (isAdmin || isOwner) {
             farm.setName(dto.getName());
             farm.setLatitude(dto.getLatitude());
