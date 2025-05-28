@@ -115,6 +115,8 @@ public ResponseEntity<String> signUp(@RequestBody SignUpDto signUpDto) {
     user.setCity(signUpDto.getCity());
     user.setStreet(signUpDto.getStreet());
     user.setEmail(signUpDto.getEmail());
+    user.setProfilePhotoUrl(signUpDto.getProfilePhoto());
+
 
         Role role = roleRepository.findByName(roleName)
             .orElseThrow(() -> new RuntimeException("Role '" + roleName + "' not found"));
