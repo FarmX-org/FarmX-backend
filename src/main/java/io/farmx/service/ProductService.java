@@ -126,6 +126,7 @@ public class ProductService {
         ProductDTO dto = new ProductDTO();
         dto.setId(existing.getId());
         dto.setPlantedCropId(existing.getPlantedCrop().getId());
+        dto.setCropName(existing.getPlantedCrop().getCrop().getName());
         dto.setQuantity(existing.getQuantity());
         dto.setUnit(existing.getUnit());
         dto.setPrice(existing.getPrice());
@@ -148,6 +149,7 @@ public class ProductService {
             ProductDTO dto = new ProductDTO();
             dto.setId(p.getId());
             dto.setPlantedCropId(p.getPlantedCrop().getId());
+            dto.setCropName(p.getPlantedCrop().getCrop().getName());
             dto.setQuantity(p.getQuantity());
             dto.setUnit(p.getUnit());
             dto.setPrice(p.getPrice());
