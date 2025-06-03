@@ -8,11 +8,13 @@ import java.util.stream.StreamSupport;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.farmx.dto.SignUpDto;
 import io.farmx.dto.UserProfileDTO;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.UserRepository;
@@ -60,4 +62,12 @@ public class UserController {
 
         return ResponseEntity.ok(dtos);
     }
+    
+    @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserProfileDTO> createUser(@RequestBody SignUpDto dto) {
+        UserEntity newUser = userService.createUser(dto);
+        return ResponseEntity.ok(userService.toDTO(newUser));
+    }
+
 }
