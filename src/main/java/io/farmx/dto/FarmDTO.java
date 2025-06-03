@@ -1,5 +1,7 @@
 package io.farmx.dto;
 
+import io.farmx.enums.FarmStatus;
+
 public class FarmDTO {
 
     private Long id;
@@ -8,25 +10,44 @@ public class FarmDTO {
     private double longitude;
     private double areaSize;
     private String soilType;
-    private boolean verified;
     private String licenseDocumentUrl;
     private double rating;
     private int ratingCount;
+    private FarmStatus status;
+    private String rejectionReason;
 
 
-    public FarmDTO(Long id, String name, double latitude, double longitude, double areaSize, String soilType, boolean verified, String licenseDocumentUrl, double rating, int ratingCount) {
+    public FarmDTO(Long id, String name, double latitude, double longitude, double areaSize, String soilType,
+                   String licenseDocumentUrl, double rating, int ratingCount, FarmStatus status, String rejectionReason) {
         this.id = id;
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.areaSize = areaSize;
         this.soilType = soilType;
-        this.verified = verified;
         this.licenseDocumentUrl = licenseDocumentUrl;
         this.rating = rating;
         this.ratingCount = ratingCount;
+        this.status = status;
+        this.rejectionReason = rejectionReason;
     }
 
+
+    public FarmStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(FarmStatus status) {
+        this.status = status;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
 
 
     public Long getId() { return id; }
@@ -46,9 +67,6 @@ public class FarmDTO {
 
     public String getSoilType() { return soilType; }
     public void setSoilType(String soilType) { this.soilType = soilType; }
-
-    public boolean isVerified() { return verified; }
-    public void setVerified(boolean verified) { this.verified = verified; }
 
     public String getLicenseDocumentUrl() { return licenseDocumentUrl; }
     public void setLicenseDocumentUrl(String licenseDocumentUrl) { this.licenseDocumentUrl = licenseDocumentUrl; }
