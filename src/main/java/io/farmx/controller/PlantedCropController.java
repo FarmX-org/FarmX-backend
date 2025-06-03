@@ -46,7 +46,7 @@ public class PlantedCropController {
         return ResponseEntity.noContent().build();
     }
 
-        @GetMapping("/by-farmer")
+    @GetMapping("/by-farmer")
         public ResponseEntity<List<FarmCropsDTO>> getCropsByFarmer(Principal principal) {
             List<FarmCropsDTO> result = plantedCropService.getAllCropsByFarmer(principal);
             return ResponseEntity.ok(result);
