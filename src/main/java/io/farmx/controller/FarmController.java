@@ -1,6 +1,7 @@
 package io.farmx.controller;
 
 import io.farmx.dto.FarmDTO;
+import io.farmx.enums.FarmStatus;
 import io.farmx.service.FarmService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -61,4 +62,14 @@ public class FarmController {
         FarmDTO ratedFarm = farmService.rateFarm(id, rating);
         return ResponseEntity.ok(ratedFarm);
     }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<FarmDTO> changeFarmStatus(@PathVariable Long id,@RequestParam FarmStatus status,
+            @RequestParam(required = false) String reason
+    ) {
+        FarmDTO updated = farmService.changeFarmStatus(id, status, reason);
+        return ResponseEntity.ok(updated);
+    }
+
 }
