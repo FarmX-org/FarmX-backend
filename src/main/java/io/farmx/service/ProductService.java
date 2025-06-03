@@ -162,4 +162,25 @@ public class ProductService {
             return dto;
         }).toList();
     }
+    
+    public List<ProductDTO> getAvailableProductsForStore() {
+        List<Product> products = productRepository.findByAvailableTrue();
+
+        return products.stream().map(p -> {
+            ProductDTO dto = new ProductDTO();
+            dto.setId(p.getId());
+            dto.setPlantedCropId(p.getPlantedCrop().getId());
+            dto.setCropName(p.getPlantedCrop().getCrop().getName());
+            dto.setCategory(p.getPlantedCrop().getCrop().getCategory());
+            dto.setQuantity(p.getQuantity());
+            dto.setUnit(p.getUnit());
+            dto.setPrice(p.getPrice());
+            dto.setAvailable(p.isAvailable());
+            dto.setAddedAt(p.getAddedAt());
+            dto.setImageUrl(p.getImageUrl());
+            dto.setDescription(p.getDescription());
+            return dto;
+        }).toList();
+    }
+
 }
