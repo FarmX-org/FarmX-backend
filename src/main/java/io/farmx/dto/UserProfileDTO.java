@@ -5,6 +5,7 @@ import java.util.List;
 
 public class UserProfileDTO {
 
+	private Long id; // 👈 أضفنا هذا السطر
     private String username;
     private String name;
     private String phone;
@@ -16,27 +17,31 @@ public class UserProfileDTO {
     private LocalDateTime updatedAt;
     private List<String> roles;
 
-    // Constructors
-
     public UserProfileDTO() {}
 
-    public UserProfileDTO(String username, String name, String phone, String city,
+    public UserProfileDTO(Long id, String username, String name, String phone, String city,
             String street, String email, String profilePhotoUrl,
             LocalDateTime createdAt, LocalDateTime updatedAt,
             List<String> roles) {
-this.username = username;
-this.name = name;
-this.phone = phone;
-this.city = city;
-this.street = street;
-this.email = email;
-this.profilePhotoUrl = profilePhotoUrl;
-this.createdAt = createdAt;
-this.updatedAt = updatedAt;
-this.roles = roles;
-}
+        this.id = id;
+        this.username = username;
+        this.name = name;
+        this.phone = phone;
+        this.city = city;
+        this.street = street;
+        this.email = email;
+        this.profilePhotoUrl = profilePhotoUrl;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.roles = roles;
+    }
+    public Long getId() {
+        return id;
+    }
 
-    // Getters and Setters
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
