@@ -6,6 +6,7 @@ import io.farmx.model.FarmOrder;
 import io.farmx.model.Order;
 import io.farmx.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,8 @@ public class OrderController {
     private OrderService orderService;
 
     /**
-     * Create an order manually (not from cart).
-     * This might be used for admin-created orders or custom use cases.
+     * ✅ Create a custom/manual order by providing OrderDTO.
+     * Used when a consumer wants to place an order for specific items (not from cart).
      */
     @PostMapping
     @PreAuthorize("hasRole('CONSUMER')")
@@ -30,8 +31,8 @@ public class OrderController {
     }
 
     /**
-     * Create an order based on the authenticated consumer's current cart.
-     * This is the default way for consumers to place orders.
+     * 🛒 Create an order from the authenticated user's current cart.
+     * Automatically splits the cart into sub-orders per farm.
      */
     @PostMapping("/from-cart")
     @PreAuthorize("hasRole('CONSUMER')")
@@ -39,53 +40,92 @@ public class OrderController {
         return orderService.createOrderFromCart(principal);
     }
 
-    // Consumer - Get their own orders
+    /**
+     * 📦 Get all orders placed by the authenticated consumer.
+     */
     @GetMapping("/consumer")
     @PreAuthorize("hasRole('CONSUMER')")
     public List<OrderDTO> getConsumerOrders(Principal principal) {
         return orderService.getOrdersForConsumer(principal);
     }
 
-    // Consumer - Get order details by order ID
+    /**
+     * 🔍 Get details of a specific order by ID for the authenticated consumer.
+     */
     @GetMapping("/consumer/{id}")
     @PreAuthorize("hasRole('CONSUMER')")
     public OrderDTO getOrderById(@PathVariable Long id, Principal principal) {
         return orderService.getOrderById(id, principal);
     }
 
-    // Admin - View all orders in the system
+    /**
+     * 👑 Admin only - View all orders in the system.
+     */
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public List<Order> getAllOrdersForAdmin() {
         return orderService.getAllOrdersForAdmin();
     }
 
-    // Handler - View their assigned orders
+    /**
+     * 🚚 Handler only - View all orders assigned to them.
+     */
     @GetMapping("/handler")
     @PreAuthorize("hasRole('HANDLER')")
     public List<Order> getOrdersForHandler(Principal principal) {
         return orderService.getOrdersForHandler(principal);
     }
 
-    // Handler - Update order status (e.g., from PENDING to PROCESSING or DELIVERED)
+    /**
+     * 🔁 Handler - Update the status of an order (e.g., to PROCESSING or DELIVERED).
+     * Valid transitions should be handled in the service.
+     */
     @PutMapping("/handler/{orderId}/status")
     @PreAuthorize("hasRole('HANDLER')")
     public OrderDTO updateOrderStatus(@PathVariable Long orderId, @RequestParam OrderStatus status, Principal principal) {
         return orderService.updateOrderStatus(orderId, status, principal);
     }
 
-    // Farmer - View orders related to their farm
+    /**
+     * 🌾 Farmer - Get all orders that include products from a specific farm.
+     */
     @GetMapping("/farm/{farmId}")
     @PreAuthorize("hasRole('FARMER')")
     public List<FarmOrder> getOrdersForFarm(@PathVariable Long farmId, Principal principal) {
         return orderService.getOrdersForFarm(principal, farmId);
     }
 
-    // Farmer - Update status of a specific FarmOrder (their part of a shared order)
+    /**
+     * 🔄 Farmer - Update the status of their part in a shared order (FarmOrder).
+     */
     @PutMapping("/farm-order/{farmOrderId}/status")
     @PreAuthorize("hasRole('FARMER')")
     public FarmOrder updateFarmOrderStatus(@PathVariable Long farmOrderId, @RequestParam OrderStatus status) {
         return orderService.updateFarmOrderStatus(farmOrderId, status);
     }
 
+    /**
+     * 🛡️ Consumer - Get the delivery code of a READY order.
+     * This code is used by the handler to confirm delivery.
+     */
+    @GetMapping("/consumer/{orderId}/delivery-code")
+    @PreAuthorize("hasRole('CONSUMER')")
+    public ResponseEntity<String> getDeliveryCode(
+            @PathVariable Long orderId,
+            Principal principal) {
+        return ResponseEntity.ok(orderService.getDeliveryCodeForConsumer(orderId, principal.getName()));
+    }
+
+    /**
+     * ✅ Handler - Confirm delivery using the delivery code provided by the consumer.
+     * If the code is correct and not expired, status changes to DELIVERED.
+     */
+    @PutMapping("/handler/{orderId}/deliver")
+    @PreAuthorize("hasRole('HANDLER')")
+    public ResponseEntity<OrderDTO> confirmDelivery(
+            @PathVariable Long orderId,
+            @RequestParam String code,
+            Principal principal) {
+        return ResponseEntity.ok(orderService.confirmDeliveryByHandler(orderId, code, principal.getName()));
+    }
 }
