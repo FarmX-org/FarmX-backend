@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @Service
 public class OrderService {
@@ -46,6 +47,64 @@ public class OrderService {
 	
 	
 	
+	//delivery
+	public void generateDeliveryCode(Order order) {
+	    String code = String.format("%04d", new Random().nextInt(10000));
+	    order.setDeliveryCode(code);
+	    order.setDeliveryCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
+	    orderRepository.save(order);
+	}
+	
+	public String getDeliveryCodeForConsumer(Long orderId, String username) {
+	    Consumer consumer = (Consumer) userRepository.findByUsername(username)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    Order order = orderRepository.findById(orderId)
+	            .orElseThrow(() -> new RuntimeException("Order not found"));
+
+	    if (!order.getConsumer().getId().equals(consumer.getId())) {
+	        throw new SecurityException("Access denied");
+	    }
+
+	    if (order.getOrderStatus() != OrderStatus.READY) {
+	        throw new IllegalStateException("Order is not ready");
+	    }
+
+	    return order.getDeliveryCode();
+	}
+	public OrderDTO confirmDeliveryByHandler(Long orderId, String code, String username) {
+	    Handler handler = (Handler) userRepository.findByUsername(username)
+	            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+	    Order order = orderRepository.findById(orderId)
+	            .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+	    if (!order.getHandler().getId().equals(handler.getId())) {
+	        throw new SecurityException("Not your order");
+	    }
+
+	    if (order.getOrderStatus() != OrderStatus.READY) {
+	        throw new IllegalStateException("Order not ready for delivery");
+	    }
+
+	    if (order.getDeliveryCodeExpiresAt().isBefore(LocalDateTime.now())) {
+	        throw new IllegalStateException("Code expired");
+	    }
+
+	    if (!order.getDeliveryCode().equals(code)) {
+	        throw new IllegalArgumentException("Incorrect code");
+	    }
+
+	    order.setOrderStatus(OrderStatus.DELIVERED);
+	    order.setDeliveredAt(LocalDateTime.now());
+	    order.setDeliveryCode(null);
+	    order.setDeliveryCodeExpiresAt(null);
+
+	    return convertToDTO(orderRepository.save(order));
+	}
+
+
+
 	///Get orders
     
     public List<Order> getAllOrdersForAdmin() {
