@@ -35,7 +35,7 @@ public class DataInitializer {
         createRoleIfNotFound("Admin");
         createRoleIfNotFound("Farmer");
         createRoleIfNotFound("Consumer");
-        createRoleIfNotFound("OrderHandler");
+        createRoleIfNotFound("Handler");
         createOrderHandlerUserIfNotFound();
         createAdminUserIfNotFound(); 
         }
@@ -67,20 +67,20 @@ public class DataInitializer {
     }
 
    private void createOrderHandlerUserIfNotFound() {
-	    String handlerUsername = "order.handler";
-	    String handlerEmail = "orders@farmx.com";
+	    String handlerUsername = "handler";
+	    String handlerEmail = "handler@farmx.com";
 
 	    if (userRepository.findByUsername(handlerUsername).isEmpty()) {
 	    	Handler handler = new Handler();
 	        handler.setUsername(handlerUsername);
-	        handler.setPassword(passwordEncoder.encode("1234"));         handler.setName("Order Handler");
+	        handler.setPassword(passwordEncoder.encode("1234"));         handler.setName("Handler");
 	        handler.setPhone("1111111111");
 	        handler.setCity("Warehouse City");
 	        handler.setStreet("Packing Dept");
 	        handler.setEmail(handlerEmail);
 
-	        Role handlerRole = roleRepository.findByName("OrderHandler")
-	                .orElseThrow(() -> new RuntimeException("Role OrderHandler not found"));
+	        Role handlerRole = roleRepository.findByName("Handler")
+	                .orElseThrow(() -> new RuntimeException("Role Handler not found"));
 
 	        handler.setRoles(Collections.singletonList(handlerRole));
 	        userRepository.save(handler);
