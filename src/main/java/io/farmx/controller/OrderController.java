@@ -1,5 +1,6 @@
 package io.farmx.controller;
 
+import io.farmx.dto.FarmOrderDTO;
 import io.farmx.dto.OrderDTO;
 import io.farmx.enums.OrderStatus;
 import io.farmx.model.FarmOrder;
@@ -93,7 +94,7 @@ public class OrderController {
      */
     @GetMapping("/farm/{farmId}")
     @PreAuthorize("hasRole('FARMER')")
-    public List<FarmOrder> getOrdersForFarm(@PathVariable Long farmId, Principal principal) {
+    public List<FarmOrderDTO> getOrdersForFarm(@PathVariable Long farmId, Principal principal) {
         return orderService.getOrdersForFarm(principal, farmId);
     }
 
@@ -102,7 +103,7 @@ public class OrderController {
      */
     @PutMapping("/farm-order/{farmOrderId}/status")
     @PreAuthorize("hasRole('FARMER')")
-    public FarmOrder updateFarmOrderStatus(
+    public FarmOrderDTO updateFarmOrderStatus(
             @PathVariable Long farmOrderId,
             @RequestParam OrderStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deliveryTime
