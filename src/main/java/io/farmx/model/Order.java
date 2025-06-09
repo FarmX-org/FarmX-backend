@@ -20,6 +20,10 @@ public class Order {
     private OrderStatus orderStatus; // ex: "PENDING", "READY", "DELIVERED"
     private LocalDateTime createdAt;
 
+    private String deliveryCode;
+    private LocalDateTime deliveryCodeExpiresAt;
+    private LocalDateTime deliveredAt;
+
     private LocalDateTime estimatedDeliveryTime;
     @ManyToOne
     @JoinColumn(name = "consumer_id")
@@ -100,6 +104,30 @@ public class Order {
 
 	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
+	}
+
+	public String getDeliveryCode() {
+		return deliveryCode;
+	}
+
+	public void setDeliveryCode(String deliveryCode) {
+		this.deliveryCode = deliveryCode;
+	}
+
+	public LocalDateTime getDeliveryCodeExpiresAt() {
+		return deliveryCodeExpiresAt;
+	}
+
+	public void setDeliveryCodeExpiresAt(LocalDateTime deliveryCodeExpiresAt) {
+		this.deliveryCodeExpiresAt = deliveryCodeExpiresAt;
+	}
+
+	public LocalDateTime getDeliveredAt() {
+		return deliveredAt;
+	}
+
+	public void setDeliveredAt(LocalDateTime deliveredAt) {
+		this.deliveredAt = deliveredAt;
 	}
 
       

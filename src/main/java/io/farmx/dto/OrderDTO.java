@@ -13,6 +13,9 @@ public class OrderDTO {
     private List<FarmOrderDTO> farmOrders;
     
     private LocalDateTime estimatedDeliveryTime;
+    private String deliveryCode;
+    private LocalDateTime deliveryCodeExpiresAt;
+
 
     public LocalDateTime getEstimatedDeliveryTime() {
         return estimatedDeliveryTime;
@@ -55,4 +58,16 @@ public class OrderDTO {
     public void setFarmOrders(List<FarmOrderDTO> farmOrders) {
         this.farmOrders = farmOrders;
     }
+	public String getDeliveryCode() {
+		return deliveryCode;
+	}
+	public void setDeliveryCode(String deliveryCode) {
+		this.deliveryCode = deliveryCode;
+	}
+	public LocalDateTime getDeliveryCodeExpiresAt() {
+		return deliveryCodeExpiresAt;
+	}
+	public void setDeliveryCodeExpiresAt(LocalDateTime deliveryCodeExpiresAt) {
+		this.deliveryCodeExpiresAt = deliveryCodeExpiresAt;
+	}
 }
