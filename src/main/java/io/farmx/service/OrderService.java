@@ -39,9 +39,13 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
 	private  FarmRepository farmRepo;
 
+    @Autowired
 	private CartRepository cartRepository;
+    
+    @Autowired
 	private CartItemRepository cartItemRepository;
     
 	
