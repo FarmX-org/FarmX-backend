@@ -66,7 +66,7 @@ public class OrderController {
      */
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Order> getAllOrdersForAdmin() {
+    public List<OrderDTO> getAllOrdersForAdmin() {
         return orderService.getAllOrdersForAdmin();
     }
 
@@ -75,7 +75,7 @@ public class OrderController {
      */
     @GetMapping("/handler")
     @PreAuthorize("hasRole('HANDLER')")
-    public List<Order> getOrdersForHandler(Principal principal) {
+    public List<OrderDTO> getOrdersForHandler(Principal principal) {
         return orderService.getOrdersForHandler(principal);
     }
 
