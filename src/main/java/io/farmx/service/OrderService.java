@@ -380,9 +380,10 @@ public class OrderService {
                 OrderItem orderItem = new OrderItem();
                 orderItem.setFarmOrder(newFarmOrder);
                 orderItem.setProduct(product);
+                
                 orderItem.setQuantity(itemDTO.getQuantity());
                 orderItem.setPrice(product.getPrice() * itemDTO.getQuantity());
-
+                
                 items.add(orderItem);
                 farmOrderTotal += orderItem.getPrice();
             }
@@ -428,6 +429,7 @@ public class OrderService {
                 OrderItemDTO itemDTO = new OrderItemDTO();
                 itemDTO.setId(item.getId());
                 itemDTO.setProductId(item.getProduct().getId());
+                itemDTO.setProductName(item.getProduct().getPlantedCrop().getCrop().getName()); 
                 itemDTO.setQuantity(item.getQuantity());
                 itemDTO.setPrice(item.getPrice());
                 itemDTOs.add(itemDTO);
