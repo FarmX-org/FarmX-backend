@@ -6,11 +6,13 @@ import io.farmx.model.FarmOrder;
 import io.farmx.model.Order;
 import io.farmx.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -100,8 +102,12 @@ public class OrderController {
      */
     @PutMapping("/farm-order/{farmOrderId}/status")
     @PreAuthorize("hasRole('FARMER')")
-    public FarmOrder updateFarmOrderStatus(@PathVariable Long farmOrderId, @RequestParam OrderStatus status) {
-        return orderService.updateFarmOrderStatus(farmOrderId, status);
+    public FarmOrder updateFarmOrderStatus(
+            @PathVariable Long farmOrderId,
+            @RequestParam OrderStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deliveryTime
+    ) {
+        return orderService.updateFarmOrderStatus(farmOrderId, status, deliveryTime);
     }
 
     /**
