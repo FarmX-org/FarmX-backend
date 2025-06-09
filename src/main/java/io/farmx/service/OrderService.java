@@ -218,16 +218,20 @@ public class OrderService {
         return convertToDTO(updated);
     }
 
-     
-     public FarmOrder updateFarmOrderStatus(Long farmOrderId, OrderStatus newStatus) {
-        FarmOrder farmOrder = farmOrderRepository.findById(farmOrderId)
-                .orElseThrow(() -> new RuntimeException("FarmOrder not found"));
+     public FarmOrder updateFarmOrderStatus(Long farmOrderId, OrderStatus newStatus, LocalDateTime deliveryTime) {
+    	    FarmOrder farmOrder = farmOrderRepository.findById(farmOrderId)
+    	            .orElseThrow(() -> new RuntimeException("FarmOrder not found"));
 
-        farmOrder.setOrderStatus(newStatus);
-        farmOrderRepository.save(farmOrder); 
-        updateOrderStatusIfAllFarmOrdersReady(farmOrder.getOrder().getId());
-        return farmOrder;
-    }
+    	    farmOrder.setOrderStatus(newStatus);
+             if (deliveryTime != null) {
+    	        farmOrder.setDeliveryTime(deliveryTime);
+    	    }
+
+    	    farmOrderRepository.save(farmOrder);
+    	    updateOrderStatusIfAllFarmOrdersReady(farmOrder.getOrder().getId());
+    	    return farmOrder;
+    	}
+
 
       public void updateOrderStatusIfAllFarmOrdersReady(Long orderId) {
         Order order = orderRepository.findById(orderId)
