@@ -111,17 +111,28 @@ public class OrderService {
 
 	///Get orders
     
-    public List<Order> getAllOrdersForAdmin() {
-        return orderRepository.findAll(); 
-        }
+	public List<OrderDTO> getAllOrdersForAdmin() {
+	    List<Order> orders = orderRepository.findAll();
+	    List<OrderDTO> dtoList = new ArrayList<>();
+	    for (Order order : orders) {
+	        dtoList.add(convertToDTO(order));
+	    }
+	    return dtoList;
+	}
 
-    public List<Order> getOrdersForHandler(Principal principal) {
-        String username = principal.getName();
-        Handler handler = (Handler) userRepository.findByUsername(username)
-            .orElseThrow(() -> new AccessDeniedException("Handler not found"));
+	public List<OrderDTO> getOrdersForHandler(Principal principal) {
+	    String username = principal.getName();
+	    Handler handler = (Handler) userRepository.findByUsername(username)
+	        .orElseThrow(() -> new AccessDeniedException("Handler not found"));
 
-        return orderRepository.findByHandlerId(handler.getId());
-    }
+	    List<Order> orders = orderRepository.findByHandlerId(handler.getId());
+	    List<OrderDTO> dtoList = new ArrayList<>();
+	    for (Order order : orders) {
+	        dtoList.add(convertToDTO(order));
+	    }
+	    return dtoList;
+	}
+
 
     public List<FarmOrderDTO> getOrdersForFarm(Principal principal, Long farmId) {
         String username = principal.getName();
