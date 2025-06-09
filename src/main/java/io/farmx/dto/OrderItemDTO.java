@@ -5,6 +5,7 @@ public class OrderItemDTO {
     private Long productId;
     private int quantity;
     private double price;
+    private String productName;
 
     // Getters and Setters
     public Long getId() {
@@ -34,4 +35,10 @@ public class OrderItemDTO {
     public void setPrice(double price) {
         this.price = price;
     }
+	public String getProductName() {
+		return productName;
+	}
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
 }
