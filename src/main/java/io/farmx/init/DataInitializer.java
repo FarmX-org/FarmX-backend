@@ -1,5 +1,6 @@
 package io.farmx.init;
 
+import io.farmx.model.Handler;
 import io.farmx.model.Role;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.RoleRepository;
@@ -34,7 +35,8 @@ public class DataInitializer {
         createRoleIfNotFound("Admin");
         createRoleIfNotFound("Farmer");
         createRoleIfNotFound("Consumer");
-
+        createRoleIfNotFound("OrderHandler");
+        createOrderHandlerUserIfNotFound();
         createAdminUserIfNotFound(); 
         }
 
@@ -64,7 +66,31 @@ public class DataInitializer {
         }
     }
 
-    
+   private void createOrderHandlerUserIfNotFound() {
+	    String handlerUsername = "order.handler";
+	    String handlerEmail = "orders@farmx.com";
+
+	    if (userRepository.findByUsername(handlerUsername).isEmpty()) {
+	    	Handler handler = new Handler();
+	        handler.setUsername(handlerUsername);
+	        handler.setPassword(passwordEncoder.encode("1234"));         handler.setName("Order Handler");
+	        handler.setPhone("1111111111");
+	        handler.setCity("Warehouse City");
+	        handler.setStreet("Packing Dept");
+	        handler.setEmail(handlerEmail);
+
+	        Role handlerRole = roleRepository.findByName("OrderHandler")
+	                .orElseThrow(() -> new RuntimeException("Role OrderHandler not found"));
+
+	        handler.setRoles(Collections.singletonList(handlerRole));
+	        userRepository.save(handler);
+
+	        logger.info("OrderHandler user created with username: {}", handlerUsername);
+	    } else {
+	        logger.info("OrderHandler user already exists.");
+	    }
+	}
+
 
     private void createRoleIfNotFound(String roleName) {
         if (roleRepository.findByName(roleName).isEmpty()) {
