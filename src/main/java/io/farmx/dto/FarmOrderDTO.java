@@ -11,8 +11,17 @@ public class FarmOrderDTO {
     private OrderStatus orderStatus;
     private LocalDateTime deliveryTime;
     private List<OrderItemDTO> items;
+    
+    private String farmName;
 
-    // Getters and Setters
+    public String getFarmName() {
+        return farmName;
+    }
+
+    public void setFarmName(String farmName) {
+        this.farmName = farmName;
+    }
+
     public Long getId() {
         return id;
     }

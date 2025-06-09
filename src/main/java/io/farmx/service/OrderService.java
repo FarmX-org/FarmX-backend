@@ -409,6 +409,7 @@ public class OrderService {
             io.farmx.dto.FarmOrderDTO foDto = new io.farmx.dto.FarmOrderDTO();
             foDto.setId(farmOrder.getId());
             foDto.setFarmId(farmOrder.getFarm().getId());
+            foDto.setFarmName(farmOrder.getFarm().getName()); 
             foDto.setOrderStatus(farmOrder.getOrderStatus());
             foDto.setDeliveryTime(farmOrder.getDeliveryTime());
 
