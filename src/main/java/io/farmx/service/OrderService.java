@@ -123,27 +123,46 @@ public class OrderService {
         return orderRepository.findByHandlerId(handler.getId());
     }
 
-    public List<FarmOrder> getOrdersForFarm(Principal principal,Long farmId) {
+    public List<FarmOrderDTO> getOrdersForFarm(Principal principal, Long farmId) {
         String username = principal.getName();
         UserEntity user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new AccessDeniedException("User not found"));
+                .orElseThrow(() -> new AccessDeniedException("User not found"));
 
         if (!(user instanceof Farmer)) {
             throw new AccessDeniedException("Only farms allowed");
         }
-        
+
         Farm farm = farmRepo.findById(farmId)
-                .orElseThrow(() -> {
-                    return new NullPointerException("Farm not found");
-                });
+                .orElseThrow(() -> new NullPointerException("Farm not found"));
 
         boolean isOwner = (user instanceof Farmer farmer) && farm.getFarmer().getId().equals(farmer.getId());
-        if ( isOwner) {
-            return farmOrderRepository.findByFarmId(farmId);
-              } else {
-                    throw new AccessDeniedException("Unauthorized to show these orders");
+        if (!isOwner) {
+            throw new AccessDeniedException("Unauthorized to show these orders");
         }
-    
+
+        List<FarmOrder> orders = farmOrderRepository.findByFarmId(farmId);
+
+        return orders.stream().map(order -> {
+            FarmOrderDTO dto = new FarmOrderDTO();
+            dto.setId(order.getId());
+            dto.setFarmId(order.getFarm().getId());
+            dto.setFarmName(order.getFarm().getName());
+            dto.setOrderStatus(order.getOrderStatus());
+            dto.setDeliveryTime(order.getDeliveryTime());
+
+            List<OrderItemDTO> itemDTOs = order.getItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setId(item.getId());
+                itemDTO.setProductId(item.getProduct().getId());
+                itemDTO.setProductName(item.getProduct().getPlantedCrop().getCrop().getName());
+                itemDTO.setQuantity(item.getQuantity());
+                itemDTO.setPrice(item.getPrice());
+                return itemDTO;
+            }).toList();
+
+            dto.setItems(itemDTOs);
+            return dto;
+        }).toList();
     }
 
 
@@ -218,19 +237,40 @@ public class OrderService {
         return convertToDTO(updated);
     }
 
-     public FarmOrder updateFarmOrderStatus(Long farmOrderId, OrderStatus newStatus, LocalDateTime deliveryTime) {
+     public FarmOrderDTO updateFarmOrderStatus(Long farmOrderId, OrderStatus newStatus, LocalDateTime deliveryTime) {
     	    FarmOrder farmOrder = farmOrderRepository.findById(farmOrderId)
     	            .orElseThrow(() -> new RuntimeException("FarmOrder not found"));
 
     	    farmOrder.setOrderStatus(newStatus);
-             if (deliveryTime != null) {
+    	    if (deliveryTime != null) {
     	        farmOrder.setDeliveryTime(deliveryTime);
     	    }
 
     	    farmOrderRepository.save(farmOrder);
+
     	    updateOrderStatusIfAllFarmOrdersReady(farmOrder.getOrder().getId());
-    	    return farmOrder;
+    	    FarmOrderDTO dto = new FarmOrderDTO();
+    	    dto.setId(farmOrder.getId());
+    	    dto.setFarmId(farmOrder.getFarm().getId());
+    	    dto.setFarmName(farmOrder.getFarm().getName());
+    	    dto.setOrderStatus(farmOrder.getOrderStatus());
+    	    dto.setDeliveryTime(farmOrder.getDeliveryTime());
+
+    	    List<OrderItemDTO> itemDTOs = farmOrder.getItems().stream().map(item -> {
+    	        OrderItemDTO itemDTO = new OrderItemDTO();
+    	        itemDTO.setId(item.getId());
+    	        itemDTO.setProductId(item.getProduct().getId());
+    	        itemDTO.setProductName(item.getProduct().getPlantedCrop().getCrop().getName());
+    	        itemDTO.setQuantity(item.getQuantity());
+    	        itemDTO.setPrice(item.getPrice());
+    	        return itemDTO;
+    	    }).toList();
+
+    	    dto.setItems(itemDTOs);
+
+    	    return dto;
     	}
+
 
 
       public void updateOrderStatusIfAllFarmOrdersReady(Long orderId) {
