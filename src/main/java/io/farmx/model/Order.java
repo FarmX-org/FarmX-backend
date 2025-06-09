@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.farmx.enums.OrderStatus;
+
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -15,8 +17,10 @@ public class Order {
 
     private double totalAmount;
 
+    private OrderStatus orderStatus; // ex: "PENDING", "READY", "DELIVERED"
     private LocalDateTime createdAt;
 
+    private LocalDateTime estimatedDeliveryTime;
     @ManyToOne
     @JoinColumn(name = "consumer_id")
     private Consumer consumer;
@@ -24,7 +28,19 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FarmOrder> farmOrders = new ArrayList<>();
 
-    @PrePersist
+    @ManyToOne
+    @JoinColumn(name = "handler_id")
+    private Handler handler;
+
+    public Handler getHandler() {
+		return handler;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	@PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
@@ -67,6 +83,23 @@ public class Order {
 
 	public void setFarmOrders(List<FarmOrder> farmOrders) {
 		this.farmOrders = farmOrders;
+	}
+
+
+	public LocalDateTime getEstimatedDeliveryTime() {
+		return estimatedDeliveryTime;
+	}
+
+	public void setEstimatedDeliveryTime(LocalDateTime estimatedDeliveryTime) {
+		this.estimatedDeliveryTime = estimatedDeliveryTime;
+	}
+
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 
       
