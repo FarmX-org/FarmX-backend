@@ -2,6 +2,7 @@ package io.farmx.service;
 
 import io.farmx.dto.FarmDTO;
 import io.farmx.enums.FarmStatus;
+import io.farmx.enums.OrderStatus;
 import io.farmx.model.Farm;
 import io.farmx.model.Farmer;
 import io.farmx.model.UserEntity;
@@ -84,7 +85,7 @@ public class FarmService {
         Farm farm = fromDto(dto);
         farm.setFarmer(farmer);
         dto.setSoilType(soilTypeFromCoords);
-
+        farm.setStatus(FarmStatus.PENDING);
         Farm savedFarm = farmRepo.save(farm);
         logger.info("Farm '{}' created successfully with id {}", savedFarm.getName(), savedFarm.getId());
         return toDto(savedFarm);
