@@ -23,8 +23,52 @@ public class Crop {
 
     private double averagePrice;
 
+    @Column
+    private String preferredSoilType;
 
-    public Long getId() {
+    @Column
+    private String preferredRegion;
+
+    @Column
+    private String temperatureSensitivity; // HIGH, MEDIUM, LOW
+
+    @Column
+    private String waterNeedLevel; // LOW, MEDIUM, HIGH
+
+
+    public String getPreferredSoilType() {
+		return preferredSoilType;
+	}
+
+	public void setPreferredSoilType(String preferredSoilType) {
+		this.preferredSoilType = preferredSoilType;
+	}
+
+	public String getPreferredRegion() {
+		return preferredRegion;
+	}
+
+	public void setPreferredRegion(String preferredRegion) {
+		this.preferredRegion = preferredRegion;
+	}
+
+	public String getTemperatureSensitivity() {
+		return temperatureSensitivity;
+	}
+
+	public void setTemperatureSensitivity(String temperatureSensitivity) {
+		this.temperatureSensitivity = temperatureSensitivity;
+	}
+
+	public String getWaterNeedLevel() {
+		return waterNeedLevel;
+	}
+
+	public void setWaterNeedLevel(String waterNeedLevel) {
+		this.waterNeedLevel = waterNeedLevel;
+	}
+
+	public Long getId() {
         return id;
     }
 
