@@ -2,8 +2,11 @@ package io.farmx.service;
 
 
 import io.farmx.dto.CropDTO;
+import io.farmx.enums.NotificationType;
 import io.farmx.model.Crop;
+import io.farmx.model.UserEntity;
 import io.farmx.repository.CropRepository;
+import io.farmx.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,11 @@ import java.util.stream.Collectors;
 public class CropService {
 
     @Autowired private CropRepository repo;
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private CropDTO toDto(Crop c) {
         CropDTO r = new CropDTO();
@@ -36,6 +44,18 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+        Crop saved = repo.save(c);
+
+     // نفترض إنو كل المستخدمين لازم يوصَلهم إشعار، بنجيبهم كلهم
+        List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
+        for (UserEntity user : users) {
+            notificationService.sendNotificationTo(
+                user,
+                "محصول جديد!",
+                "تمت إضافة المحصول: " + saved.getName(),
+                NotificationType.GENERAL_ANNOUNCEMENT
+            );
+        }
         return toDto(repo.save(c));
     }
 
