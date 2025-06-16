@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,12 +53,46 @@ public class OrderService {
 	
 	
 	//delivery
-	public void generateDeliveryCode(Order order) {
-	    String code = String.format("%04d", new Random().nextInt(10000));
-	    order.setDeliveryCode(code);
-	    order.setDeliveryCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
-	    orderRepository.save(order);
-	}
+    public void generateDeliveryCode(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getOrderStatus() != OrderStatus.READY) {
+            throw new IllegalStateException("Order must be READY to generate a delivery code");
+        }
+
+        String code = String.format("%06d", new SecureRandom().nextInt(1000000));
+        order.setDeliveryCode(code);
+        
+        LocalDateTime expiry;
+        if (order.getEstimatedDeliveryTime() != null) {
+                    expiry = order.getEstimatedDeliveryTime().plusMinutes(30);
+        } else {
+               expiry = LocalDateTime.now().plusHours(1);
+        }
+
+        order.setDeliveryCodeExpiresAt(expiry);
+        orderRepository.save(order);
+    }
+
+    public void regenerateDeliveryCodeForConsumer(Long orderId, String username) {
+        Consumer consumer = (Consumer) userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getConsumer().getId().equals(consumer.getId())) {
+            throw new SecurityException("Access denied: this order doesn't belong to you");
+        }
+
+        if (order.getOrderStatus() != OrderStatus.READY) {
+            throw new IllegalStateException("Order must be READY to regenerate delivery code");
+        }
+
+        generateDeliveryCode(orderId);
+    }
+
 	
 	public String getDeliveryCodeForConsumer(Long orderId, String username) {
 	    Consumer consumer = (Consumer) userRepository.findByUsername(username)
