@@ -111,6 +111,22 @@ public class OrderController {
         return orderService.updateFarmOrderStatus(farmOrderId, status, deliveryTime);
     }
 
+    
+    
+    /**
+     * 🔄 Consumer - Regenerate delivery code for a READY order.
+     * Useful if the old code is lost or expired.
+     */
+    @PutMapping("/consumer/{orderId}/regenerate-code")
+    @PreAuthorize("hasRole('CONSUMER')")
+    public ResponseEntity<String> regenerateDeliveryCode(
+            @PathVariable Long orderId,
+            Principal principal) {
+
+        orderService.regenerateDeliveryCodeForConsumer(orderId, principal.getName());
+        return ResponseEntity.ok("Delivery code regenerated successfully.");
+    }
+
     /**
      * 🛡️ Consumer - Get the delivery code of a READY order.
      * This code is used by the handler to confirm delivery.

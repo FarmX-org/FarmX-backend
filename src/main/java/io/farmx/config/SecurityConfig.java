@@ -40,18 +40,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
-            .csrf(csrf -> csrf.disable()) // Disable CSRF
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/signup", "/login").permitAll() 
+                .requestMatchers("/signup", "/login").permitAll()
+                .requestMatchers("/ws-notifications/**").authenticated() 
                 .requestMatchers("/farms/**").hasAnyRole("FARMER", "ADMIN")
                 .requestMatchers(HttpMethod.POST,"/crops/**").hasAnyRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE,"/crops/**").hasAnyRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,"/crops/**").hasAnyRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() 
-                .anyRequest().authenticated() 
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
