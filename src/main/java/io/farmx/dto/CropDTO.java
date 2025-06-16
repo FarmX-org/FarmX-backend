@@ -1,6 +1,8 @@
 
 package io.farmx.dto;
 
+import jakarta.persistence.Column;
+
 public class CropDTO {
 	private Long id;
     private String name;
@@ -9,6 +11,36 @@ public class CropDTO {
     private String season;
     private int growthDays;
     private double averagePrice;
+    private String preferredSoilType;
+    private String preferredRegion;
+    private String temperatureSensitivity; // HIGH, MEDIUM, LOW
+    private String waterNeedLevel; // LOW, MEDIUM, HIGH
+
+
+	public String getPreferredSoilType() {
+		return preferredSoilType;
+	}
+	public void setPreferredSoilType(String preferredSoilType) {
+		this.preferredSoilType = preferredSoilType;
+	}
+	public String getPreferredRegion() {
+		return preferredRegion;
+	}
+	public void setPreferredRegion(String preferredRegion) {
+		this.preferredRegion = preferredRegion;
+	}
+	public String getTemperatureSensitivity() {
+		return temperatureSensitivity;
+	}
+	public void setTemperatureSensitivity(String temperatureSensitivity) {
+		this.temperatureSensitivity = temperatureSensitivity;
+	}
+	public String getWaterNeedLevel() {
+		return waterNeedLevel;
+	}
+	public void setWaterNeedLevel(String waterNeedLevel) {
+		this.waterNeedLevel = waterNeedLevel;
+	}
 	public String getName() {
 		return name;
 	}

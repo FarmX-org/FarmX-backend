@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import io.farmx.dto.CartDTO;
@@ -12,16 +13,19 @@ import io.farmx.service.CartService;
 
 @RestController
 @RequestMapping("/cart")
+
+@PreAuthorize("hasRole('CONSUMER')")
 public class CartController {
 
     @Autowired
     private CartService cartService;
+    
 
     @GetMapping
     public ResponseEntity<CartDTO> getCart(Principal principal) {
         return ResponseEntity.ok(cartService.getCart(principal));
     }
-
+    
     @PostMapping("/items")
     public ResponseEntity<CartDTO> addItemToCart(@RequestBody CartItemDTO itemDTO, Principal principal) {
         CartDTO updatedCart = cartService.addItemToCart(itemDTO, principal);

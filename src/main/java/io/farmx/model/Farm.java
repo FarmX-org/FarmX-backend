@@ -21,8 +21,6 @@ public class Farm {
     private double areaSize;
     private String soilType;
 
-    private boolean verified;
-
     @Enumerated(EnumType.STRING)
     private FarmStatus status = FarmStatus.PENDING;
 
@@ -48,8 +46,43 @@ public class Farm {
     private List<PlantedCrop> plantedCrops = new ArrayList<>();
 
 
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
 
-    public Long getId() {
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+
+    public FarmStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(FarmStatus status) {
+		this.status = status;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public Long getId() {
         return id;
     }
 
@@ -97,13 +130,6 @@ public class Farm {
         this.soilType = soilType;
     }
 
-    public boolean isVerified() {
-        return verified;
-    }
-
-    public void setVerified(boolean verified) {
-        this.verified = verified;
-    }
 
     public String getLicenseDocumentUrl() {
         return licenseDocumentUrl;

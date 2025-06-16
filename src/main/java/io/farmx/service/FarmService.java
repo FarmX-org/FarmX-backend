@@ -1,6 +1,8 @@
 package io.farmx.service;
 
 import io.farmx.dto.FarmDTO;
+import io.farmx.enums.FarmStatus;
+import io.farmx.enums.OrderStatus;
 import io.farmx.model.Farm;
 import io.farmx.model.Farmer;
 import io.farmx.model.UserEntity;
@@ -83,7 +85,7 @@ public class FarmService {
         Farm farm = fromDto(dto);
         farm.setFarmer(farmer);
         dto.setSoilType(soilTypeFromCoords);
-
+        farm.setStatus(FarmStatus.PENDING);
         Farm savedFarm = farmRepo.save(farm);
         logger.info("Farm '{}' created successfully with id {}", savedFarm.getName(), savedFarm.getId());
         return toDto(savedFarm);
@@ -145,7 +147,6 @@ public class FarmService {
             farm.setLongitude(dto.getLongitude());
             farm.setAreaSize(dto.getAreaSize());
             farm.setSoilType(dto.getSoilType());
-            farm.setVerified(dto.isVerified());
             farm.setLicenseDocumentUrl(dto.getLicenseDocumentUrl());
 
             Farm updatedFarm = farmRepo.save(farm);
@@ -190,6 +191,28 @@ public class FarmService {
             throw new AccessDeniedException("Unauthorized to access this farm");
         }
     }
+    
+    public FarmDTO changeFarmStatus(Long farmId, FarmStatus newStatus, String rejectionReason) {
+        logger.info("Changing status of farm {} to {}", farmId, newStatus);
+
+        Farm farm = farmRepo.findById(farmId)
+                .orElseThrow(() -> {
+                    logger.error("Farm with id {} not found", farmId);
+                    return new NullPointerException("Farm not found");
+                });
+
+        farm.setStatus(newStatus);
+        if (newStatus == FarmStatus.REJECTED) {
+            farm.setRejectionReason(rejectionReason);
+        } else {
+            farm.setRejectionReason(null);
+        }
+
+        Farm updatedFarm = farmRepo.save(farm);
+        logger.info("Farm {} status updated to {}", farmId, newStatus);
+        return toDto(updatedFarm);
+    }
+
 
     private FarmDTO toDto(Farm farm) {
         return new FarmDTO(
@@ -199,10 +222,11 @@ public class FarmService {
                 farm.getLongitude(),
                 farm.getAreaSize(),
                 farm.getSoilType(),
-                farm.isVerified(),
                 farm.getLicenseDocumentUrl(),
                 farm.getRating(),
-                farm.getRatingCount()
+                farm.getRatingCount(),
+                farm.getStatus(),
+                farm.getRejectionReason()
         );
     }
 
@@ -214,10 +238,12 @@ public class FarmService {
         farm.setLongitude(dto.getLongitude());
         farm.setAreaSize(dto.getAreaSize());
         farm.setSoilType(dto.getSoilType());
-        farm.setVerified(dto.isVerified());
         farm.setLicenseDocumentUrl(dto.getLicenseDocumentUrl());
         farm.setRating(dto.getRating());
         farm.setRatingCount(dto.getRatingCount());
+        farm.setStatus(dto.getStatus());
+        farm.setRejectionReason(dto.getRejectionReason());
         return farm;
     }
+
 }
