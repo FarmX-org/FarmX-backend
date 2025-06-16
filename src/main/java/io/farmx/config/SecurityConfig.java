@@ -46,6 +46,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/signup", "/login").permitAll()
+                 .requestMatchers("/ws-notifications/**").permitAll()
                // .requestMatchers("/ws-notifications/**").authenticated() 
                 .requestMatchers("/farms/**").hasAnyRole("FARMER", "ADMIN")
                 .requestMatchers(HttpMethod.POST,"/crops/**").hasAnyRole("ADMIN")
