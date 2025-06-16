@@ -17,7 +17,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    private boolean read = false;
+    private boolean isRead =false; 
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -58,11 +58,11 @@ public class Notification {
 	}
 
 	public boolean isRead() {
-		return read;
+		return isRead;
 	}
 
 	public void setRead(boolean read) {
-		this.read = read;
+		this.isRead = read;
 	}
 
 	public LocalDateTime getCreatedAt() {
