@@ -155,6 +155,28 @@ public class PlantedCropService {
 
         plantedCropRepository.delete(existing);
     }
+    
+    public List<PlantedCropDTO> getAllPlantedCrops() {
+        List<PlantedCrop> crops = plantedCropRepository.findAll();
+
+        return crops.stream().map(pc -> {
+            PlantedCropDTO dto = new PlantedCropDTO();
+            dto.setId(pc.getId());
+            dto.setCropId(pc.getCrop().getId());
+            dto.setFarmId(pc.getFarm().getId());
+            dto.setPlantedDate(pc.getPlantedDate());
+            dto.setEstimatedHarvestDate(pc.getEstimatedHarvestDate());
+            dto.setActualHarvestDate(pc.getActualHarvestDate());
+            dto.setQuantity(pc.getQuantity());
+            dto.setAvailable(pc.isAvailable());
+            dto.setNotes(pc.getNotes());
+            dto.setStatus(pc.getStatus());
+            dto.setImageUrl(pc.getImageUrl());
+            dto.setFarmName(pc.getFarm().getName());
+            dto.setFarmerName(pc.getFarm().getFarmer().getName()); 
+            return dto;
+        }).collect(Collectors.toList());
+    }
 
     public List<FarmCropsDTO> getAllCropsByFarmer(Principal principal) {
         String username = principal.getName();

@@ -14,6 +14,22 @@ public class PlantedCropDTO {
     private String notes;
     private String status;
     private String imageUrl;
+    private String farmName;
+    private String farmerName;
+
+    public String getFarmName() {
+        return farmName;
+    }
+    public void setFarmName(String farmName) {
+        this.farmName = farmName;
+    }
+    public String getFarmerName() {
+        return farmerName;
+    }
+    public void setFarmerName(String farmerName) {
+        this.farmerName = farmerName;
+    }
+
 	public Long getId() {
 		return id;
 	}
