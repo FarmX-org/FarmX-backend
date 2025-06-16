@@ -11,7 +11,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-notifications")
-                .setAllowedOriginPatterns("http://localhost:3000", "https://farmx-abx3.onrender.com")
+               .setAllowedOriginPatterns("*")
+               //   .setAllowedOriginPatterns("http://localhost:3000", "https://farmx-abx3.onrender.com")
                 .withSockJS();
     }
 
