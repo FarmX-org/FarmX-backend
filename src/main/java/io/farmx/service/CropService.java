@@ -4,6 +4,7 @@ package io.farmx.service;
 import io.farmx.dto.CropDTO;
 import io.farmx.enums.NotificationType;
 import io.farmx.model.Crop;
+import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.CropRepository;
 import io.farmx.repository.UserRepository;
@@ -11,6 +12,7 @@ import io.farmx.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +38,12 @@ public class CropService {
         return r;
     }
 
-    public CropDTO createCrop(CropDTO dto) {
+    public CropDTO createCrop(CropDTO dto,Principal principal) {
+    	  String username = principal.getName();
+          UserEntity user = userRepository.findByUsername(username)
+                  .orElseThrow(() -> {
+                      return new IllegalArgumentException("User not found");
+                  });
         Crop c = new Crop();
         c.setName(dto.getName());
         c.setCategory(dto.getCategory());
@@ -44,18 +51,16 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
-        Crop saved = repo.save(c);
 
-     // نفترض إنو كل المستخدمين لازم يوصَلهم إشعار، بنجيبهم كلهم
-        List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
-        for (UserEntity user : users) {
-            notificationService.sendNotificationTo(
-                user,
-                "محصول جديد!",
-                "تمت إضافة المحصول: " + saved.getName(),
-                NotificationType.GENERAL_ANNOUNCEMENT
-            );
-        }
+        
+        Notification notification = new Notification();
+        notification.setTitle("Crop Added");
+        notification.setMessage("You successfully added crop: " + c.getName());
+        notification.setType(NotificationType.INFO);
+        notification.setRecipient(user);
+
+        notificationService.saveAndSend(notification);
+        
         return toDto(repo.save(c));
     }
 
