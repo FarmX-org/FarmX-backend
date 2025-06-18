@@ -14,7 +14,22 @@ public class ProductDTO {
     private String description;
     private String imageUrl;
     private String category;
+    private double rating;
+    private int ratingCount;
+
     
+	public double getRating() {
+		return rating;
+	}
+	public void setRating(double rating) {
+		this.rating = rating;
+	}
+	public int getRatingCount() {
+		return ratingCount;
+	}
+	public void setRatingCount(int ratingCount) {
+		this.ratingCount = ratingCount;
+	}
 	public Long getId() {
 		return id;
 	}
