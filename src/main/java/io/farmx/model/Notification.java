@@ -1,45 +1,84 @@
-// io.farmx.model.Notification.java
 package io.farmx.model;
 
+import io.farmx.enums.NotificationType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 public class Notification {
-    @Id @GeneratedValue private Long id;
-    private Long userId;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
     private String message;
-    private LocalDateTime timestamp = LocalDateTime.now();
-    private boolean read = false;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    private boolean isRead =false; 
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity recipient;
+
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Long getUserId() {
-		return userId;
+
+	public String getTitle() {
+		return title;
 	}
-	public void setUserId(Long userId) {
-		this.userId = userId;
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
+
 	public String getMessage() {
 		return message;
 	}
+
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public LocalDateTime getTimestamp() {
-		return timestamp;
+
+	public NotificationType getType() {
+		return type;
 	}
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
+
+	public void setType(NotificationType type) {
+		this.type = type;
 	}
+
 	public boolean isRead() {
-		return read;
+		return isRead;
 	}
+
 	public void setRead(boolean read) {
-		this.read = read;
+		this.isRead = read;
 	}
-    
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public UserEntity getRecipient() {
+		return recipient;
+	}
+
+	public void setRecipient(UserEntity recipient) {
+		this.recipient = recipient;
+	}
+
 }
