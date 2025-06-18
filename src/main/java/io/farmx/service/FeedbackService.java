@@ -34,27 +34,26 @@ public class FeedbackService {
 
 
     public void submitFeedback(FeedbackDTO dto, Principal principal) {
-
         String username = principal.getName();
         UserEntity user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (!(user instanceof Consumer)) {
             throw new IllegalArgumentException("Only consumers can give feedback");
         }
 
-       Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        Order order = orderRepository.findById(dto.getOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
         if (order.getOrderStatus() != OrderStatus.DELIVERED) {
             throw new IllegalArgumentException("Feedback is allowed only after order is delivered");
         }
 
-      if (!order.getConsumer().getId().equals(user.getId())) {
+        if (!order.getConsumer().getId().equals(user.getId())) {
             throw new IllegalArgumentException("User did not place this order");
         }
 
-         Feedback feedback = new Feedback();
+        Feedback feedback = new Feedback();
         feedback.setConsumer((Consumer) user);
         feedback.setRating(dto.getRating());
         feedback.setComment(dto.getComment());
@@ -64,17 +63,18 @@ public class FeedbackService {
         switch(dto.getFeedbackType()) {
             case PRODUCT:
                 Product product = productRepository.findById(dto.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                        .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
                 boolean productInOrder = order.getFarmOrders().stream()
-                    .flatMap(farmOrder -> farmOrder.getItems().stream())
-                    .anyMatch(item -> item.getProduct().getId().equals(product.getId()));
+                        .flatMap(farmOrder -> farmOrder.getItems().stream())
+                        .anyMatch(item -> item.getProduct().getId().equals(product.getId()));
 
                 if (!productInOrder) {
                     throw new IllegalArgumentException("Product not part of this order");
                 }
-              boolean existsProductFeedback = feedbackRepository
-                    .existsByConsumerAndProductAndOrder((Consumer) user, product, order);
+
+                boolean existsProductFeedback = feedbackRepository
+                        .existsByConsumerAndProductAndOrder((Consumer) user, product, order);
 
                 if (existsProductFeedback) {
                     throw new IllegalArgumentException("Feedback already given for this product in this order");
@@ -85,17 +85,17 @@ public class FeedbackService {
 
             case FARM:
                 Farm farm = farmRepository.findById(dto.getFarmId())
-                    .orElseThrow(() -> new IllegalArgumentException("Farm not found"));
-               
+                        .orElseThrow(() -> new IllegalArgumentException("Farm not found"));
+
                 boolean farmInOrder = order.getFarmOrders().stream()
-                    .anyMatch(farmOrder -> farmOrder.getFarm().getId().equals(farm.getId()));
+                        .anyMatch(farmOrder -> farmOrder.getFarm().getId().equals(farm.getId()));
 
                 if (!farmInOrder) {
                     throw new IllegalArgumentException("Farm not part of this order");
                 }
 
                 boolean existsFarmFeedback = feedbackRepository
-                    .existsByConsumerAndFarmAndOrder((Consumer) user, farm, order);
+                        .existsByConsumerAndFarmAndOrder((Consumer) user, farm, order);
 
                 if (existsFarmFeedback) {
                     throw new IllegalArgumentException("Feedback already given for this farm in this order");
@@ -107,8 +107,11 @@ public class FeedbackService {
 
         feedbackRepository.save(feedback);
 
-         if (feedback.getFeedbackType() == FeedbackType.FARM) {
+        // تحديث التقييم حسب النوع
+        if (feedback.getFeedbackType() == FeedbackType.FARM) {
             updateFarmRating(feedback.getFarm());
+        } else if (feedback.getFeedbackType() == FeedbackType.PRODUCT) {
+            updateProductRating(feedback.getProduct());
         }
     }
 
@@ -150,6 +153,19 @@ public class FeedbackService {
         return allFeedbacks;
     }
   
+    private void updateProductRating(Product product) {
+        List<Feedback> feedbacks = feedbackRepository.findByProduct(product);
+        double avgRating = feedbacks.stream().mapToInt(Feedback::getRating).average().orElse(0.0);
+        product.setRating(avgRating);
+        product.setRatingCount(feedbacks.size());
+        productRepository.save(product);
+    }
+
+    public List<FeedbackDTO> getFeedbacksForProduct(Long productId) {
+        List<Feedback> feedbacks = feedbackRepository.findByProduct_Id(productId);
+        return feedbacks.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
     
     public List<FeedbackDTO> getAllFeedbacks() {
         List<Feedback> feedbacks = feedbackRepository.findAll();
