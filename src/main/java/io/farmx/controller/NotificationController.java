@@ -1,6 +1,7 @@
 package io.farmx.controller;
 
 import io.farmx.dto.NotificationDTO;
+import io.farmx.enums.NotificationType;
 import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.NotificationRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/notifications")
@@ -50,6 +52,21 @@ public class NotificationController {
         return ResponseEntity.ok(dtoList);
     }
 
+    @PostMapping("/fcm/save-token")
+    public ResponseEntity<?> saveFcmToken(Principal principal, @RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String username = principal.getName();
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFcmToken(token);
+        userRepository.save(user);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @PutMapping("/{id}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Long id, Principal principal) {
         Notification notif = notificationRepository.findById(id)
@@ -63,24 +80,22 @@ public class NotificationController {
         notificationRepository.save(notif);
         return ResponseEntity.ok().build();
     }
-    @MessageMapping("/sendMessage") // Endpoint matching the JavaScript destination
-    @SendTo("/topic/notifications") // Broadcast to subscribers of this topic
-    public String sendMessage(String message) {
-        System.out.println("Received message: " + message); // Debugging log
-        return message; // Broadcast the message
+    @PostMapping("/users/{id}/notify")
+    public ResponseEntity<?> sendNotificationToUser(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String title = body.get("title");
+        String message = body.get("message");
+
+        UserEntity user = userRepository.findById(id).orElseThrow();
+        Notification notif = new Notification();
+        notif.setTitle(title);
+        notif.setMessage(message);
+        notif.setRecipient(user);
+        notif.setRead(false);
+        notif.setType(NotificationType.INFO); // حسب enum تبعك
+
+        notificationService.saveAndSend(notif);
+
+        return ResponseEntity.ok("Notification sent and saved!");
     }
 
-    /*@GetMapping
-    public Page<Notification> getMyNotifications(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Principal principal) {
-        return service.getNotifications(principal, page, size);
-    }
-
-    @PostMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id, Principal principal) {
-        service.markAsRead(id, principal);
-        return ResponseEntity.ok().build();
-    }*/
 }

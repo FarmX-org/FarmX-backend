@@ -39,6 +39,9 @@ public class UserEntity{
 	private String password;
     private String email;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     @Column(columnDefinition = "LONGTEXT")
     private String profilePhotoUrl;
 
@@ -55,6 +58,15 @@ public class UserEntity{
 	public Long  getId() {
 		return id;
 	}
+	
+	public String getFcmToken() {
+		return fcmToken;
+	}
+
+	public void setFcmToken(String fcmToken) {
+		this.fcmToken = fcmToken;
+	}
+
 	public void setId(Long  id) {
 		this.id = id;
 	}
@@ -125,6 +137,8 @@ public class UserEntity{
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+
 	
 	
 	

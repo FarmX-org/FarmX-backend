@@ -7,6 +7,7 @@ import io.farmx.model.Crop;
 import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.CropRepository;
+import io.farmx.repository.NotificationRepository;
 import io.farmx.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,10 @@ public class CropService {
 
     @Autowired private CropRepository repo;
     @Autowired
-    private NotificationService notificationService;
+    private NotificationRepository notificationRepository;
 
+    @Autowired
+    private FCMService fcmService;
     @Autowired
     private UserRepository userRepository;
 
@@ -38,12 +41,14 @@ public class CropService {
         return r;
     }
 
-    public CropDTO createCrop(CropDTO dto,Principal principal) {
-    	  String username = principal.getName();
-          UserEntity user = userRepository.findByUsername(username)
-                  .orElseThrow(() -> {
-                      return new IllegalArgumentException("User not found");
-                  });
+   ;
+
+    public CropDTO createCrop(CropDTO dto, Principal principal) {
+        String username = principal.getName();
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Crop c = new Crop();
         c.setName(dto.getName());
         c.setCategory(dto.getCategory());
@@ -52,17 +57,34 @@ public class CropService {
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
 
-        
+        Crop savedCrop = repo.save(c); // ✅ Save crop
+
+        // ✅ Create & save in DB
         Notification notification = new Notification();
         notification.setTitle("Crop Added");
-        notification.setMessage("You successfully added crop: " + c.getName());
+        notification.setMessage("You successfully added crop: " + savedCrop.getName());
         notification.setType(NotificationType.INFO);
         notification.setRecipient(user);
+        notificationRepository.save(notification); // 💾 Save in DB
 
-        notificationService.saveAndSend(notification);
-        
-        return toDto(repo.save(c));
+        // ✅ Send via FCM
+        String fcmToken = user.getFcmToken(); // Make sure this is stored
+        if (fcmToken != null && !fcmToken.isBlank()) {
+            try {
+                fcmService.sendNotificationToToken(
+                    notification.getTitle(),
+                    notification.getMessage(),
+                    fcmToken
+                );
+            } catch (Exception e) {
+                System.err.println("❌ Failed to send FCM notification: " + e.getMessage());
+            }
+        }
+
+        return toDto(savedCrop);
     }
+
+
 
 
     public List<CropDTO> getAllCrops() {

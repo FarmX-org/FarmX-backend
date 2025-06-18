@@ -56,10 +56,10 @@ public class JWTGenerator {
 		}
 	}
 	
-	public Authentication getAuthentication(String token) {
+	/*public Authentication getAuthentication(String token) {
 	    String username = getUsernameFromJWT(token);
 	    return new UsernamePasswordAuthenticationToken(username, null,List.of());
-	}
+	}*/
 
 
 }
