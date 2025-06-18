@@ -21,4 +21,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     boolean existsByConsumerAndFarmAndOrder(Consumer consumer, Farm farm, Order order);
 
     List<Feedback> findByFarm(Farm farm);
+    List<Feedback> findByProduct(Product product);
+    List<Feedback> findByProduct_Id(Long productId);
 }

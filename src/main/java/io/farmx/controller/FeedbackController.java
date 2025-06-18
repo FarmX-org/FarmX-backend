@@ -18,6 +18,13 @@ public class FeedbackController {
     @Autowired
     private FeedbackService feedbackService;
 
+    
+
+    @GetMapping("/product/{productId}")
+    public List<FeedbackDTO> getFeedbacksForProduct(@PathVariable Long productId) {
+        return feedbackService.getFeedbacksForProduct(productId);
+    }
+
     @PostMapping
     public ResponseEntity<?> giveFeedback(@RequestBody FeedbackDTO dto, Principal principal) {
         feedbackService.submitFeedback(dto, principal);
