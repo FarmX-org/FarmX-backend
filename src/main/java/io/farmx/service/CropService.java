@@ -23,18 +23,19 @@ public class CropService {
 
     @Autowired
     private UserRepository userRepository;
+private CropDTO toDto(Crop c) {
+    CropDTO r = new CropDTO();
+    r.setId(c.getId());
+    r.setName(c.getName());
+    r.setCategory(c.getCategory());
+    r.setDescription(c.getDescription());
+    r.setSeason(c.getSeason());
+    r.setGrowthDays(c.getGrowthDays());
+    r.setAveragePrice(c.getAveragePrice());
+    r.setImageUrl(c.getImageUrl()); // 👈 أضف هذا
+    return r;
+}
 
-    private CropDTO toDto(Crop c) {
-        CropDTO r = new CropDTO();
-        r.setId(c.getId());
-        r.setName(c.getName());
-        r.setCategory(c.getCategory());
-        r.setDescription(c.getDescription());
-        r.setSeason(c.getSeason());
-        r.setGrowthDays(c.getGrowthDays());
-        r.setAveragePrice(c.getAveragePrice());
-        return r;
-    }
 
     public CropDTO createCrop(CropDTO dto) {
         Crop c = new Crop();
@@ -44,18 +45,7 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
-        Crop saved = repo.save(c);
-
-     // نفترض إنو كل المستخدمين لازم يوصَلهم إشعار، بنجيبهم كلهم
-        List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
-        for (UserEntity user : users) {
-            notificationService.sendNotificationTo(
-                user,
-                "محصول جديد!",
-                "تمت إضافة المحصول: " + saved.getName(),
-                NotificationType.GENERAL_ANNOUNCEMENT
-            );
-        }
+        c.setImageUrl(dto.getImageUrl()); 
         return toDto(repo.save(c));
     }
 
@@ -78,6 +68,8 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+        c.setImageUrl(dto.getImageUrl()); // 👈 أضف هذا
+
         return toDto(repo.save(c));
     }
 

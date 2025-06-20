@@ -17,7 +17,7 @@ public class Crop {
     @Column(length = 500)
     private String description;
 
-    private String season; 
+    private String season;
 
     private int growthDays;
 
@@ -35,40 +35,50 @@ public class Crop {
     @Column
     private String waterNeedLevel; // LOW, MEDIUM, HIGH
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getPreferredSoilType() {
-		return preferredSoilType;
-	}
+        return preferredSoilType;
+    }
 
-	public void setPreferredSoilType(String preferredSoilType) {
-		this.preferredSoilType = preferredSoilType;
-	}
+    public void setPreferredSoilType(String preferredSoilType) {
+        this.preferredSoilType = preferredSoilType;
+    }
 
-	public String getPreferredRegion() {
-		return preferredRegion;
-	}
+    public String getPreferredRegion() {
+        return preferredRegion;
+    }
 
-	public void setPreferredRegion(String preferredRegion) {
-		this.preferredRegion = preferredRegion;
-	}
+    public void setPreferredRegion(String preferredRegion) {
+        this.preferredRegion = preferredRegion;
+    }
 
-	public String getTemperatureSensitivity() {
-		return temperatureSensitivity;
-	}
+    public String getTemperatureSensitivity() {
+        return temperatureSensitivity;
+    }
 
-	public void setTemperatureSensitivity(String temperatureSensitivity) {
-		this.temperatureSensitivity = temperatureSensitivity;
-	}
+    public void setTemperatureSensitivity(String temperatureSensitivity) {
+        this.temperatureSensitivity = temperatureSensitivity;
+    }
 
-	public String getWaterNeedLevel() {
-		return waterNeedLevel;
-	}
+    public String getWaterNeedLevel() {
+        return waterNeedLevel;
+    }
 
-	public void setWaterNeedLevel(String waterNeedLevel) {
-		this.waterNeedLevel = waterNeedLevel;
-	}
+    public void setWaterNeedLevel(String waterNeedLevel) {
+        this.waterNeedLevel = waterNeedLevel;
+    }
 
-	public Long getId() {
+    public Long getId() {
         return id;
     }
 
