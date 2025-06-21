@@ -30,8 +30,6 @@ public class CropService {
     @Autowired
     private NotificationService notificationService;
     @Autowieed private UserRepository userRepository;
-    @Autowired
-    private UserRepository userRepository;
 private CropDTO toDto(Crop c) {
     CropDTO r = new CropDTO();
     r.setId(c.getId());
