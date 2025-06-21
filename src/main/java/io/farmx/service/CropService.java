@@ -32,6 +32,10 @@ private CropDTO toDto(Crop c) {
     r.setSeason(c.getSeason());
     r.setGrowthDays(c.getGrowthDays());
     r.setAveragePrice(c.getAveragePrice());
+    r.setPreferredSoilType(c.getPreferredSoilType());
+    r.setPreferredRegion(c.getPreferredRegion());
+    r.setTemperatureSensitivity(c.getTemperatureSensitivity());
+    r.setWaterNeedLevel(c.getWaterNeedLevel());
     r.setImageUrl(c.getImageUrl()); // 👈 أضف هذا
     return r;
 }
@@ -45,6 +49,10 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+        c.setPreferredSoilType(dto.getPreferredSoilType());
+        c.setPreferredRegion(dto.getPreferredRegion());
+        c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
+        c.setWaterNeedLevel(dto.getWaterNeedLevel());
         c.setImageUrl(dto.getImageUrl()); 
         return toDto(repo.save(c));
     }
@@ -68,6 +76,11 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+        c.setPreferredSoilType(dto.getPreferredSoilType());
+        c.setPreferredRegion(dto.getPreferredRegion());
+        c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
+        c.setWaterNeedLevel(dto.getWaterNeedLevel());
+
         c.setImageUrl(dto.getImageUrl()); // 👈 أضف هذا
 
         return toDto(repo.save(c));
