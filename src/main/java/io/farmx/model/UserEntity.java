@@ -58,7 +58,7 @@ public class UserEntity{
 	public Long  getId() {
 		return id;
 	}
-	
+
 	public String getFcmToken() {
 		return fcmToken;
 	}
@@ -66,6 +66,7 @@ public class UserEntity{
 	public void setFcmToken(String fcmToken) {
 		this.fcmToken = fcmToken;
 	}
+
 
 	public void setId(Long  id) {
 		this.id = id;
@@ -138,8 +139,6 @@ public class UserEntity{
 		this.updatedAt = updatedAt;
 	}
 
-
-	
 	
 	
 }

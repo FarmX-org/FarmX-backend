@@ -1,5 +1,4 @@
 
-// --- NotificationService.java ---
 package io.farmx.service;
 
 import io.farmx.dto.NotificationDTO;
@@ -8,6 +7,7 @@ import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.NotificationRepository;
 import io.farmx.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +15,16 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.security.Principal;
+
+
 @Service
 public class NotificationService {
+
 
     @Autowired
     private NotificationRepository notificationRepository;
@@ -65,4 +73,5 @@ public class NotificationService {
         }
         notificationRepository.saveAll(notifications);
     }
+
 }

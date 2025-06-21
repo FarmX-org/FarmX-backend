@@ -1,5 +1,6 @@
 package io.farmx.config;
 import java.util.Date;
+
 import java.util.List;
 
 import io.jsonwebtoken.Jwts;
@@ -12,6 +13,7 @@ import io.jsonwebtoken.lang.Collections;
 
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -55,11 +57,6 @@ public class JWTGenerator {
 			throw new AuthenticationCredentialsNotFoundException("JWT was exprired or incorrect",ex.fillInStackTrace());
 		}
 	}
-	
-	/*public Authentication getAuthentication(String token) {
-	    String username = getUsernameFromJWT(token);
-	    return new UsernamePasswordAuthenticationToken(username, null,List.of());
-	}*/
 
 
 }

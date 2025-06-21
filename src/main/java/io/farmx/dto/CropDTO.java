@@ -16,6 +16,17 @@ public class CropDTO {
     private String temperatureSensitivity; // HIGH, MEDIUM, LOW
     private String waterNeedLevel; // LOW, MEDIUM, HIGH
 
+	private String imageUrl;
+
+public String getImageUrl() {
+    return imageUrl;
+}
+
+public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+}
+
+
 
 	public String getPreferredSoilType() {
 		return preferredSoilType;

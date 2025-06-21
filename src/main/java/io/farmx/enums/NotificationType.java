@@ -15,4 +15,5 @@ public enum NotificationType {
     FERTILIZER_REMINDER,       // Fertilizer time
     PEST_ALERT,                // Watch out for crop diseases or pests
     SOIL_CHECK_NEEDED          // Suggests soil testing if quality drops
+
 }

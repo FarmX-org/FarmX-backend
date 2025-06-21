@@ -4,16 +4,20 @@ package io.farmx.service;
 import io.farmx.dto.CropDTO;
 import io.farmx.enums.NotificationType;
 import io.farmx.model.Crop;
+
 import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.CropRepository;
 import io.farmx.repository.NotificationRepository;
+
 import io.farmx.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.security.Principal;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,33 +26,29 @@ public class CropService {
 
     @Autowired private CropRepository repo;
     @Autowired
-    private NotificationRepository notificationRepository;
+    private NotificationService notificationService;
 
-    @Autowired
-    private FCMService fcmService;
     @Autowired
     private UserRepository userRepository;
+private CropDTO toDto(Crop c) {
+    CropDTO r = new CropDTO();
+    r.setId(c.getId());
+    r.setName(c.getName());
+    r.setCategory(c.getCategory());
+    r.setDescription(c.getDescription());
+    r.setSeason(c.getSeason());
+    r.setGrowthDays(c.getGrowthDays());
+    r.setAveragePrice(c.getAveragePrice());
+    r.setPreferredSoilType(c.getPreferredSoilType());
+    r.setPreferredRegion(c.getPreferredRegion());
+    r.setTemperatureSensitivity(c.getTemperatureSensitivity());
+    r.setWaterNeedLevel(c.getWaterNeedLevel());
+    r.setImageUrl(c.getImageUrl()); // 👈 أضف هذا
+    return r;
+}
 
-    private CropDTO toDto(Crop c) {
-        CropDTO r = new CropDTO();
-        r.setId(c.getId());
-        r.setName(c.getName());
-        r.setCategory(c.getCategory());
-        r.setDescription(c.getDescription());
-        r.setSeason(c.getSeason());
-        r.setGrowthDays(c.getGrowthDays());
-        r.setAveragePrice(c.getAveragePrice());
-        return r;
-    }
 
-   ;
-
-    public CropDTO createCrop(CropDTO dto, Principal principal) {
-        String username = principal.getName();
-
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
+    public CropDTO createCrop(CropDTO dto) {
         Crop c = new Crop();
         c.setName(dto.getName());
         c.setCategory(dto.getCategory());
@@ -56,6 +56,11 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+         c.setPreferredSoilType(dto.getPreferredSoilType());
+        c.setPreferredRegion(dto.getPreferredRegion());
+        c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
+        c.setWaterNeedLevel(dto.getWaterNeedLevel());
+        c.setImageUrl(dto.getImageUrl()); 
 
         Crop savedCrop = repo.save(c); // ✅ Save crop
 
@@ -87,6 +92,7 @@ public class CropService {
 
 
 
+
     public List<CropDTO> getAllCrops() {
         return repo.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
@@ -105,6 +111,13 @@ public class CropService {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+
+        c.setPreferredSoilType(dto.getPreferredSoilType());
+        c.setPreferredRegion(dto.getPreferredRegion());
+        c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
+        c.setWaterNeedLevel(dto.getWaterNeedLevel());
+
+        c.setImageUrl(dto.getImageUrl()); // 👈 أضف هذا
         return toDto(repo.save(c));
     }
 
