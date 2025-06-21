@@ -159,6 +159,7 @@ public class ProductService {
             dto.setAddedAt(p.getAddedAt());
             dto.setImageUrl(p.getImageUrl());
             dto.setDescription(p.getDescription());
+
             dto.setRating(p.getRating());
             dto.setRatingCount(p.getRatingCount());
             return dto;
@@ -182,11 +183,11 @@ public class ProductService {
             dto.setAddedAt(p.getAddedAt());
             dto.setImageUrl(p.getImageUrl());
             dto.setDescription(p.getDescription());
+
             dto.setRating(p.getRating());
             dto.setRatingCount(p.getRatingCount());
             return dto;
         }).toList();
     }
-
 
 }

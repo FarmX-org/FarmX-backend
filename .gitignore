@@ -4,6 +4,11 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+src/main/resources/firebase/serviceAccountKey.json
+# Never push secrets
+src/main/resources/firebase/test.json
+.env
+
 
 ### STS ###
 .apt_generated

@@ -4,12 +4,19 @@ package io.farmx.service;
 import io.farmx.dto.CropDTO;
 import io.farmx.enums.NotificationType;
 import io.farmx.model.Crop;
+
+import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.CropRepository;
+import io.farmx.repository.NotificationRepository;
+
 import io.farmx.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
+import java.security.Principal;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,13 +56,41 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
-        c.setPreferredSoilType(dto.getPreferredSoilType());
+         c.setPreferredSoilType(dto.getPreferredSoilType());
         c.setPreferredRegion(dto.getPreferredRegion());
         c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
         c.setWaterNeedLevel(dto.getWaterNeedLevel());
         c.setImageUrl(dto.getImageUrl()); 
-        return toDto(repo.save(c));
+
+        Crop savedCrop = repo.save(c); // ✅ Save crop
+
+        // ✅ Create & save in DB
+        Notification notification = new Notification();
+        notification.setTitle("Crop Added");
+        notification.setMessage("You successfully added crop: " + savedCrop.getName());
+        notification.setType(NotificationType.INFO);
+        notification.setRecipient(user);
+        notificationRepository.save(notification); // 💾 Save in DB
+
+        // ✅ Send via FCM
+        String fcmToken = user.getFcmToken(); // Make sure this is stored
+        if (fcmToken != null && !fcmToken.isBlank()) {
+            try {
+                fcmService.sendNotificationToToken(
+                    notification.getTitle(),
+                    notification.getMessage(),
+                    fcmToken
+                );
+            } catch (Exception e) {
+                System.err.println("❌ Failed to send FCM notification: " + e.getMessage());
+            }
+        }
+
+        return toDto(savedCrop);
     }
+
+
+
 
 
     public List<CropDTO> getAllCrops() {
@@ -76,13 +111,13 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
+
         c.setPreferredSoilType(dto.getPreferredSoilType());
         c.setPreferredRegion(dto.getPreferredRegion());
         c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
         c.setWaterNeedLevel(dto.getWaterNeedLevel());
 
         c.setImageUrl(dto.getImageUrl()); // 👈 أضف هذا
-
         return toDto(repo.save(c));
     }
 

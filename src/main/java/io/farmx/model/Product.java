@@ -118,6 +118,7 @@ public class Product {
 
 
 
+
 	public double getRating() {
 		return rating;
 	}
@@ -139,4 +140,5 @@ public class Product {
 	public void setRatingCount(int ratingCount) {
 		this.ratingCount = ratingCount;
 	}
+
 }
