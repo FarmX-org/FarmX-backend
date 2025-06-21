@@ -26,8 +26,10 @@ public class CropService {
 
     @Autowired private CropRepository repo;
     @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
     private NotificationService notificationService;
-
+    @Autowieed private UserRepository userRepository;
     @Autowired
     private UserRepository userRepository;
 private CropDTO toDto(Crop c) {
@@ -49,6 +51,11 @@ private CropDTO toDto(Crop c) {
 
 
     public CropDTO createCrop(CropDTO dto,Principal principal) {
+        String username = principal.getName();
+          UserEntity user = userRepository.findByUsername(username)
+                  .orElseThrow(() -> {
+                      return new IllegalArgumentException("User not found");
+                  });
         Crop c = new Crop();
         c.setName(dto.getName());
         c.setCategory(dto.getCategory());
