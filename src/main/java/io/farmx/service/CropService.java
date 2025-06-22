@@ -28,8 +28,10 @@ public class CropService {
     @Autowired
     private NotificationRepository notificationRepository;
     @Autowired
-    private NotificationService notificationService;
-    @Autowieed private UserRepository userRepository;
+    private UserRepository userRepository;
+    @Autowired
+    private FCMService fcmService;
+
 private CropDTO toDto(Crop c) {
     CropDTO r = new CropDTO();
     r.setId(c.getId());
@@ -61,7 +63,7 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
-         c.setPreferredSoilType(dto.getPreferredSoilType());
+        c.setPreferredSoilType(dto.getPreferredSoilType());
         c.setPreferredRegion(dto.getPreferredRegion());
         c.setTemperatureSensitivity(dto.getTemperatureSensitivity());
         c.setWaterNeedLevel(dto.getWaterNeedLevel());
@@ -116,7 +118,6 @@ private CropDTO toDto(Crop c) {
         c.setSeason(dto.getSeason());
         c.setGrowthDays(dto.getGrowthDays());
         c.setAveragePrice(dto.getAveragePrice());
-
         c.setPreferredSoilType(dto.getPreferredSoilType());
         c.setPreferredRegion(dto.getPreferredRegion());
         c.setTemperatureSensitivity(dto.getTemperatureSensitivity());

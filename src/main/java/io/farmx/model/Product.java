@@ -29,7 +29,7 @@ public class Product {
 
     private LocalDate addedAt;
 
-
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     @Column(length = 500)

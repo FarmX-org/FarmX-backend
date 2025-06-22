@@ -18,8 +18,8 @@ public class Crop {
     private String description;
 
 
-    private String season;
 
+    private String season;
 
     private int growthDays;
 

@@ -27,7 +27,6 @@ public void setImageUrl(String imageUrl) {
 }
 
 
-
 	public String getPreferredSoilType() {
 		return preferredSoilType;
 	}
