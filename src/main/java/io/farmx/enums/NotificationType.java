@@ -7,7 +7,7 @@ public enum NotificationType {
     FARM_APPROVED,
     GENERAL_ANNOUNCEMENT,
     INFO,
-
+    NEW_ORDER,
     CROP_NEEDS_WATER,          // Irrigation needed
     CROP_READY_FOR_HARVEST,    // Harvest time!
     WEATHER_ALERT,             // Weather-related warnings (rain, frost, etc.)

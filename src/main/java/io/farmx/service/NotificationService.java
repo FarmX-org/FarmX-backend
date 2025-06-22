@@ -31,7 +31,7 @@ public class NotificationService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired private FCMService fcmService;
     public List<NotificationDTO> getUserNotifications(Principal principal) {
         String username = principal.getName();
         UserEntity user = userRepository.findByUsername(username)
@@ -72,6 +72,26 @@ public class NotificationService {
             }
         }
         notificationRepository.saveAll(notifications);
+    }
+
+    public void sendNotification(UserEntity user, String title, String message, NotificationType type) {
+        // Save to DB
+        Notification notification = new Notification();
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setRecipient(user);
+        notificationRepository.save(notification);
+
+        // Send FCM
+        String token = user.getFcmToken();
+        if (token != null && !token.isBlank()) {
+            try {
+                fcmService.sendNotificationToToken(title, message, token);
+            } catch (Exception e) {
+                System.err.println("❌ Failed to send FCM: " + e.getMessage());
+            }
+        }
     }
 
 }

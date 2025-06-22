@@ -2,16 +2,19 @@ package io.farmx.service;
 
 import io.farmx.dto.FarmDTO;
 import io.farmx.enums.FarmStatus;
+import io.farmx.enums.NotificationType;
 import io.farmx.enums.OrderStatus;
 import io.farmx.model.Farm;
 import io.farmx.model.Farmer;
+import io.farmx.model.Notification;
 import io.farmx.model.UserEntity;
 import io.farmx.repository.FarmRepository;
+import io.farmx.repository.NotificationRepository;
 import io.farmx.repository.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,10 @@ public class FarmService {
     private final UserRepository userRepo;
     private final SoilService soilService;
 
+    @Autowired
+    private FCMService fcmService;
+    @Autowired
+    private NotificationRepository notificationRepository;
     public FarmService(FarmRepository farmRepo, UserRepository userRepo, SoilService soilService) {
         this.farmRepo = farmRepo;
         this.userRepo = userRepo;
@@ -210,6 +217,41 @@ public class FarmService {
 
         Farm updatedFarm = farmRepo.save(farm);
         logger.info("Farm {} status updated to {}", farmId, newStatus);
+
+        UserEntity farmer = farm.getFarmer();
+
+        String title;
+        String message;
+        NotificationType type;
+
+        if (newStatus == FarmStatus.APPROVED) {
+            title = "Farm Approved!";
+            message = "Your farm \"" + farm.getName() + "\" has been approved.";
+            type = NotificationType.FARM_APPROVED;
+        } else {
+            title = "Farm Rejected 😕";
+            message = "Your farm \"" + farm.getName() + "\" was rejected. Reason: " + rejectionReason;
+            type = NotificationType.INFO;
+        }
+
+        // 💾 Save notification in DB
+        Notification notification = new Notification();
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setRecipient(farmer);
+        notificationRepository.save(notification);
+
+        // 📲 Send push notification
+        String fcmToken = farmer.getFcmToken();
+        if (fcmToken != null && !fcmToken.isBlank()) {
+            try {
+                fcmService.sendNotificationToToken(title, message, fcmToken);
+            } catch (Exception e) {
+                logger.error("❌ Failed to send FCM notification: {}", e.getMessage());
+            }
+        }
+
         return toDto(updatedFarm);
     }
 
