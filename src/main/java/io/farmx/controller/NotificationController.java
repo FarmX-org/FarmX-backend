@@ -9,6 +9,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/notifications")
@@ -23,16 +24,16 @@ public class NotificationController {
 
 
     @GetMapping
-    public Page<Notification> getMyNotifications(
+    public List<NotificationDTO> getMyNotifications(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Principal principal) {
-        return service.getNotifications(principal, page, size);
+        return service.getUserNotifications(principal);
     }
 
     @PostMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id, Principal principal) {
-        service.markAsRead(id, principal);
+        service.markAllAsRead(principal);
         return ResponseEntity.ok().build();
     }
 }

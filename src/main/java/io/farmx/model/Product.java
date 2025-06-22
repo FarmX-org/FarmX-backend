@@ -29,7 +29,7 @@ public class Product {
 
     private LocalDate addedAt;
 
-
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     @Column(length = 500)
@@ -118,6 +118,7 @@ public class Product {
 
 
 
+
 	public double getRating() {
 		return rating;
 	}
@@ -139,4 +140,5 @@ public class Product {
 	public void setRatingCount(int ratingCount) {
 		this.ratingCount = ratingCount;
 	}
+
 }

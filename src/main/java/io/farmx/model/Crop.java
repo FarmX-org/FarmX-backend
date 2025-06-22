@@ -17,6 +17,8 @@ public class Crop {
     @Column(length = 500)
     private String description;
 
+
+
     private String season;
 
     private int growthDays;

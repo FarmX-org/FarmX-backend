@@ -52,7 +52,6 @@ public class UserController {
 
 
     @GetMapping("")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserProfileDTO>> getAllUsers() {
         Iterable<UserEntity> usersIterable = userRepository.findAll();
 

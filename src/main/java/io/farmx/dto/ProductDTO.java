@@ -14,6 +14,7 @@ public class ProductDTO {
     private String description;
     private String imageUrl;
     private String category;
+
     private double rating;
     private int ratingCount;
 
@@ -30,6 +31,7 @@ public class ProductDTO {
 	public void setRatingCount(int ratingCount) {
 		this.ratingCount = ratingCount;
 	}
+
 	public Long getId() {
 		return id;
 	}
