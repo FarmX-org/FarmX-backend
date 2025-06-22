@@ -3,6 +3,7 @@ package io.farmx.service;
 import io.farmx.dto.FarmOrderDTO;
 import io.farmx.dto.OrderDTO;
 import io.farmx.dto.OrderItemDTO;
+import io.farmx.enums.NotificationType;
 import io.farmx.enums.OrderStatus;
 import io.farmx.model.*;
 import io.farmx.repository.*;
@@ -49,6 +50,7 @@ public class OrderService {
     @Autowired
 	private CartItemRepository cartItemRepository;
     
+    @Autowired private  NotificationService  notificationService;
 	
 	
 	
@@ -256,7 +258,7 @@ public class OrderService {
 
     
    //الميمعة اللي لفت مخي لف ااخخ لا تعليق
-     public OrderDTO updateOrderStatus(Long orderId, OrderStatus newStatus, Principal principal) {
+    public OrderDTO updateOrderStatus(Long orderId, OrderStatus newStatus, Principal principal) {
         String username = principal.getName();
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -272,16 +274,41 @@ public class OrderService {
             throw new SecurityException("This order does not belong to you");
         }
 
-        order.setOrderStatus(newStatus);
-
+        // ✅ Prevent fake READY status if farms not ready
         if (newStatus == OrderStatus.READY) {
+            boolean allFarmOrdersReady = order.getFarmOrders().stream()
+                    .allMatch(fo -> fo.getOrderStatus() == OrderStatus.READY);
+
+            if (!allFarmOrdersReady) {
+                throw new IllegalStateException("Cannot mark order as READY until all farm orders are ready.");
+            }
+
+            // ✅ Calculate delivery time
             LocalDateTime estimatedDelivery = handlerService.calculateEstimatedDeliveryTime(order);
             order.setEstimatedDeliveryTime(estimatedDelivery);
+
+            // 🔔 Send notifications here just in case updateOrderStatusIfAllFarmOrdersReady() was skipped
+            String orderRef = "#" + order.getId();
+
+            notificationService.sendNotification(handler,
+                    "Order " + orderRef + " Ready for Delivery",
+                    "All farms have prepared their items. Time to deliver! 🚚",
+                    NotificationType.ORDER_READY
+            );
+
+            notificationService.sendNotification(order.getConsumer(),
+                    "Your Order " + orderRef + " is Ready",
+                    "Your order is ready and will be delivered soon! 🎉",
+                    NotificationType.ORDER_READY
+            );
         }
+
+        order.setOrderStatus(newStatus);
 
         Order updated = orderRepository.save(order);
         return convertToDTO(updated);
     }
+
 
      public FarmOrderDTO updateFarmOrderStatus(Long farmOrderId, OrderStatus newStatus, LocalDateTime deliveryTime) {
     	    FarmOrder farmOrder = farmOrderRepository.findById(farmOrderId)
@@ -318,21 +345,41 @@ public class OrderService {
     	}
 
 
+     public void updateOrderStatusIfAllFarmOrdersReady(Long orderId) {
+    	    Order order = orderRepository.findById(orderId)
+    	            .orElseThrow(() -> new RuntimeException("Order not found"));
 
-      public void updateOrderStatusIfAllFarmOrdersReady(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    	    boolean allReady = order.getFarmOrders().stream()
+    	        .allMatch(fo -> fo.getOrderStatus() == OrderStatus.READY);
 
-        boolean allReady = order.getFarmOrders().stream()
-            .allMatch(fo -> fo.getOrderStatus() == OrderStatus.READY);
+    	    if (allReady) {
+    	        order.setOrderStatus(OrderStatus.READY);
+    	        LocalDateTime estimatedDelivery = handlerService.calculateEstimatedDeliveryTime(order);
+    	        order.setEstimatedDeliveryTime(estimatedDelivery);
+    	        orderRepository.save(order);
 
-        if (allReady) {
-            order.setOrderStatus(OrderStatus.READY);
-            LocalDateTime estimatedDelivery = handlerService.calculateEstimatedDeliveryTime(order);
-            order.setEstimatedDeliveryTime(estimatedDelivery);
-            orderRepository.save(order);
-        }
-    }
+    	        // 🧠 Notifications
+    	        String orderRef = "#" + order.getId();
+
+    	        // ✅ 1. Notify Handler
+    	        UserEntity handler = order.getHandler();
+    	        notificationService.sendNotification(
+    	            handler,
+    	            "Order " + orderRef + " Ready for Delivery",
+    	            "All farms have prepared their items. Time to deliver! 🚚",
+    	            NotificationType.ORDER_READY
+    	        );
+
+    	        // ✅ 2. Notify Consumer
+    	        UserEntity consumer = order.getConsumer();
+    	        notificationService.sendNotification(
+    	            consumer,
+    	            "Your Order " + orderRef + " is Ready",
+    	            "Your order is ready and will be delivered soon! 🎉",
+    	            NotificationType.ORDER_READY
+    	        );
+    	    }
+    	}
 
     
     //new order
@@ -353,6 +400,8 @@ public class OrderService {
 
     	    Handler handler = handlerService.findLeastBusyHandler();
     	    order.setHandler(handler);
+    	 
+    	
 
     	    List<FarmOrder> farmOrders = new ArrayList<>();
     	    double totalAmount = 0;
@@ -421,6 +470,24 @@ public class OrderService {
 
     	    Order savedOrder = orderRepository.save(order);
 
+    	    //notification part
+    	    UserEntity handlerUser = savedOrder.getHandler();
+    	    notificationService.sendNotification(
+    	        handlerUser,
+    	        "New Order Assigned",
+    	        "You’ve been assigned to a new order #" + savedOrder.getId(),
+    	        NotificationType.ORDER_ASSIGNED
+    	    );
+
+    	    for (FarmOrder farmOrder : savedOrder.getFarmOrders()) {
+    	        UserEntity farmer = farmOrder.getFarm().getFarmer(); 
+    	        notificationService.sendNotification(
+    	            farmer,
+    	            "New Order Received",
+    	            "You received a new order for your farm: " + farmOrder.getFarm().getName(),
+    	            NotificationType.INFO
+    	        );
+    	    }
     	    cartItemRepository.deleteAll(cart.getItems());
     	    cart.getItems().clear();
     	    cart.setTotalPrice(0);
@@ -485,6 +552,24 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
 
         Order savedOrder = orderRepository.save(order);
+        //notification part
+	    UserEntity handlerUser = savedOrder.getHandler();
+	    notificationService.sendNotification(
+	        handlerUser,
+	        "New Order Assigned",
+	        "You’ve been assigned to a new order #" + savedOrder.getId(),
+	        NotificationType.ORDER_ASSIGNED
+	    );
+
+	    for (FarmOrder farmOrder : savedOrder.getFarmOrders()) {
+	        UserEntity farmer = farmOrder.getFarm().getFarmer(); 
+	        notificationService.sendNotification(
+	            farmer,
+	            "New Order Received",
+	            "You received a new order for your farm: " + farmOrder.getFarm().getName(),
+	            NotificationType.INFO
+	        );
+	    }
 
         return convertToDTO(savedOrder);
     }
