@@ -80,9 +80,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000",
-                                                      "https://farmx-abx3.onrender.com"));
+                                                      "https://farmx-abx3.onrender.com", "https://farmx-frontend.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); 
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Typ e")); 
        configuration.setAllowCredentials(true); // Allow cookies, tokens, etc.
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
