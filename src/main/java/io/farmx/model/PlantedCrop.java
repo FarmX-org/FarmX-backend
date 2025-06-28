@@ -2,6 +2,7 @@ package io.farmx.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "planted_crops")
@@ -19,6 +20,7 @@ public class PlantedCrop {
     @JoinColumn(name = "farm_id", nullable = false)
     private Farm farm;
 
+    
     private LocalDate plantedDate;
 
     private LocalDate estimatedHarvestDate;
@@ -38,7 +40,17 @@ public class PlantedCrop {
     private String imageUrl;
 
 
-    // Getters & Setters
+    private LocalDateTime fertilizedAt;
+
+    // Getter & Setter
+    public LocalDateTime getFertilizedAt() {
+        return fertilizedAt;
+    }
+
+    public void setFertilizedAt(LocalDateTime fertilizedAt) {
+        this.fertilizedAt = fertilizedAt;
+    }
+
 
     public Long getId() {
         return id;

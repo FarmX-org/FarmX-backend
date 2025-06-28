@@ -24,6 +24,17 @@ public class Crop {
     private int growthDays;
 
     private double averagePrice;
+    @Column
+    private Integer fertilizationFrequencyDays; // كم يوم بين كل تسميدة
+
+    public Integer getFertilizationFrequencyDays() {
+        return fertilizationFrequencyDays;
+    }
+
+    public void setFertilizationFrequencyDays(Integer fertilizationFrequencyDays) {
+        this.fertilizationFrequencyDays = fertilizationFrequencyDays;
+    }
+
 
     @Column
     private String preferredSoilType;

@@ -60,6 +60,22 @@ public class PlantedCropController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/{id}/fertilize")
+    public ResponseEntity<String> fertilizeCrop(@PathVariable Long id, Principal principal) {
+        plantedCropService.fertilizeCrop(id, principal);
+        return ResponseEntity.ok("Crop fertilized successfully");
+    }
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<PlantedCropDTO> getCropStatus(@PathVariable Long id, Principal principal) {
+        PlantedCropDTO dto = plantedCropService.getPlantedCropById(id, principal);
+
+        boolean needsFertilize = plantedCropService.needsFertilization(dto);
+
+        dto.setNeedsFertilization(needsFertilize);
+
+        return ResponseEntity.ok(dto);
+    }
 
 
   

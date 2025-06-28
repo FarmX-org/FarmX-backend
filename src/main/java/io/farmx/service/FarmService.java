@@ -75,6 +75,10 @@ public class FarmService {
     public FarmDTO createFarm(FarmDTO dto, Principal principal) {
     	 String soilTypeFromCoords = soilService.getSoilTypeByCoordinates(dto.getLatitude(), dto.getLongitude());
     
+    	  if (dto.getSoilType() == null || dto.getSoilType().isBlank()) {
+    	        String soilType = soilService.getSoilTypeByCoordinates(dto.getLatitude(), dto.getLongitude());
+    	        dto.setSoilType(soilType);
+    	    }
         String username = principal.getName();
         logger.info("Creating farm '{}' for user '{}'", dto.getName(), username);
 

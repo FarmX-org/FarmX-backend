@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,8 +57,14 @@ public class PlantedCropService {
         PlantedCrop plantedCrop = new PlantedCrop();
         plantedCrop.setFarm(farm);
         plantedCrop.setCrop(crop);
-        plantedCrop.setPlantedDate(dto.getPlantedDate() != null ? dto.getPlantedDate() : LocalDate.now());
-        plantedCrop.setEstimatedHarvestDate(dto.getEstimatedHarvestDate());
+
+        LocalDate plantedDate = dto.getPlantedDate() != null ? dto.getPlantedDate() : LocalDate.now();
+        plantedCrop.setPlantedDate(plantedDate);
+
+        // حسب موعد الحصاد التقديري بناءً على plantedDate و growthDays
+        LocalDate estimatedHarvestDate = plantedDate.plusDays(crop.getGrowthDays());
+        plantedCrop.setEstimatedHarvestDate(estimatedHarvestDate);
+
         plantedCrop.setActualHarvestDate(dto.getActualHarvestDate());
         plantedCrop.setQuantity(dto.getQuantity());
         plantedCrop.setAvailable(dto.isAvailable());
@@ -65,10 +72,14 @@ public class PlantedCropService {
         plantedCrop.setStatus(dto.getStatus());
         plantedCrop.setImageUrl(dto.getImageUrl());
 
+        // آخر مرة تسميد - جديد ما في، خلينا null أو حسب dto لو عندك
+        plantedCrop.setFertilizedAt(dto.getFertilizedAt());
+
         PlantedCrop saved = plantedCropRepository.save(plantedCrop);
         dto.setId(saved.getId());
         return dto;
     }
+
 
     public List<PlantedCropDTO> getPlantedCropsForFarm(Long farmId, Principal principal) {
         String username = principal.getName();
@@ -108,12 +119,27 @@ public class PlantedCropService {
         PlantedCrop existing = plantedCropRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Planted crop not found"));
 
-       if (!existing.getFarm().getFarmer().getId().equals(farmer.getId())) {
+        if (!existing.getFarm().getFarmer().getId().equals(farmer.getId())) {
             throw new AccessDeniedException("You don't own this planted crop");
         }
 
-       existing.setPlantedDate(dto.getPlantedDate() != null ? dto.getPlantedDate() : existing.getPlantedDate());
-        existing.setEstimatedHarvestDate(dto.getEstimatedHarvestDate());
+        LocalDate newPlantedDate = dto.getPlantedDate() != null ? dto.getPlantedDate() : existing.getPlantedDate();
+
+        Crop crop;
+        if (dto.getCropId() != null && !dto.getCropId().equals(existing.getCrop().getId())) {
+            crop = cropRepository.findById(dto.getCropId())
+                    .orElseThrow(() -> new IllegalArgumentException("Crop not found"));
+            existing.setCrop(crop);
+        } else {
+            crop = existing.getCrop();
+        }
+
+        existing.setPlantedDate(newPlantedDate);
+
+        // حسب موعد الحصاد مجددًا مع تحديث plantedDate أو crop
+        LocalDate estimatedHarvestDate = newPlantedDate.plusDays(crop.getGrowthDays());
+        existing.setEstimatedHarvestDate(estimatedHarvestDate);
+
         existing.setActualHarvestDate(dto.getActualHarvestDate());
         existing.setQuantity(dto.getQuantity());
         existing.setAvailable(dto.isAvailable());
@@ -121,11 +147,12 @@ public class PlantedCropService {
         existing.setStatus(dto.getStatus());
         existing.setImageUrl(dto.getImageUrl());
 
-       if (dto.getCropId() != null && !dto.getCropId().equals(existing.getCrop().getId())) {
-            Crop crop = cropRepository.findById(dto.getCropId())
-                    .orElseThrow(() -> new IllegalArgumentException("Crop not found"));
-            existing.setCrop(crop);
+        // التسميد - تحديث لو موجود
+        if (dto.getFertilizedAt() != null) {
+            existing.setFertilizedAt(dto.getFertilizedAt());
         }
+
+        // تحديث المزرعة إذا تغيرت (تأكد الملكية)
         if (dto.getFarmId() != null && !dto.getFarmId().equals(existing.getFarm().getId())) {
             Farm farm = farmRepository.findById(dto.getFarmId())
                     .orElseThrow(() -> new IllegalArgumentException("Farm not found"));
@@ -140,6 +167,7 @@ public class PlantedCropService {
         dto.setId(saved.getId());
         return dto;
     }
+
     public void deletePlantedCrop(Long id, Principal principal) {
         String username = principal.getName();
 
@@ -209,7 +237,76 @@ public class PlantedCropService {
         }).collect(Collectors.toList());
     }
 
+    // تحديث التسميد فقط - API مخصص لتحديث fertilizedAt
+    public void fertilizeCrop(Long plantedCropId, Principal principal) {
+        String username = principal.getName();
 
+        Farmer farmer = (Farmer) userRepository.findByUsername(username)
+                .orElseThrow(() -> new AccessDeniedException("User not found or not a farmer"));
+
+        PlantedCrop existing = plantedCropRepository.findById(plantedCropId)
+                .orElseThrow(() -> new IllegalArgumentException("Planted crop not found"));
+
+        if (!existing.getFarm().getFarmer().getId().equals(farmer.getId())) {
+            throw new AccessDeniedException("You don't own this planted crop");
+        }
+
+        existing.setFertilizedAt(java.time.LocalDateTime.now());
+
+        plantedCropRepository.save(existing);
+    }
+
+    public boolean needsFertilization(PlantedCropDTO dto) {
+        if (dto == null || dto.getCropId() == null) return false;
+
+        Crop crop = cropRepository.findById(dto.getCropId())
+            .orElse(null);
+
+        if (crop == null) return false;
+
+        Integer freq = crop.getFertilizationFrequencyDays();
+
+        if (freq == null || freq <= 0) return false;
+
+        if (dto.getFertilizedAt() == null) return true;
+
+        long daysSinceLast = java.time.Duration.between(
+            dto.getFertilizedAt(),
+            LocalDateTime.now()
+        ).toDays();
+
+        return daysSinceLast >= freq;
+    }
+
+
+    public PlantedCropDTO getPlantedCropById(Long id, Principal principal) {
+        String username = principal.getName();
+        Farmer farmer = (Farmer) userRepository.findByUsername(username)
+            .orElseThrow(() -> new AccessDeniedException("User not found or not a farmer"));
+
+        PlantedCrop pc = plantedCropRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Planted crop not found"));
+
+        if (!pc.getFarm().getFarmer().getId().equals(farmer.getId())) {
+            throw new AccessDeniedException("You don't own this planted crop");
+        }
+
+        PlantedCropDTO dto = new PlantedCropDTO();
+        dto.setId(pc.getId());
+        dto.setCropId(pc.getCrop().getId());
+        dto.setFarmId(pc.getFarm().getId());
+        dto.setPlantedDate(pc.getPlantedDate());
+        dto.setEstimatedHarvestDate(pc.getEstimatedHarvestDate());
+        dto.setActualHarvestDate(pc.getActualHarvestDate());
+        dto.setQuantity(pc.getQuantity());
+        dto.setAvailable(pc.isAvailable());
+        dto.setNotes(pc.getNotes());
+        dto.setStatus(pc.getStatus());
+        dto.setImageUrl(pc.getImageUrl());
+        dto.setFertilizedAt(pc.getFertilizedAt()); // مهم!
+
+        return dto;
+    }
 
   
 }

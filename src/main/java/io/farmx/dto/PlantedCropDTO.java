@@ -1,6 +1,7 @@
 package io.farmx.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PlantedCropDTO {
     private Long id;
@@ -16,6 +17,25 @@ public class PlantedCropDTO {
     private String imageUrl;
     private String farmName;
     private String farmerName;
+    private LocalDateTime fertilizedAt;
+
+    private boolean needsFertilization;
+
+    public boolean isNeedsFertilization() {
+        return needsFertilization;
+    }
+
+    public void setNeedsFertilization(boolean needsFertilization) {
+        this.needsFertilization = needsFertilization;
+    }
+
+    public LocalDateTime getFertilizedAt() {
+        return fertilizedAt;
+    }
+
+    public void setFertilizedAt(LocalDateTime fertilizedAt) {
+        this.fertilizedAt = fertilizedAt;
+    }
 
     public String getFarmName() {
         return farmName;

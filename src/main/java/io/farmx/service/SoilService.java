@@ -12,73 +12,79 @@ public class SoilService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-   
-    public String getSoilTypeByCoordinates(double latitude, double longitude) {
+    public String getSoilTypeByCoordinates(double lat, double lon) {
         try {
-            String url = String.format(SOILGRID_URL_TEMPLATE, longitude, latitude);
-            String response = restTemplate.getForObject(url, String.class);
-            return parseSoilTypeFromJson(response, latitude, longitude);
+            String url = String.format(SOILGRID_URL_TEMPLATE, lon, lat);
+            String resp = restTemplate.getForObject(url, String.class);
+            return parseSoilTypeFromJson(resp, lat, lon);
         } catch (Exception e) {
             e.printStackTrace();
-            return "UNKNOWN";
+            return classifyFallbackSoilType(lat, lon);
         }
     }
 
- 
     private String parseSoilTypeFromJson(String json, double lat, double lon) {
         JSONObject root = new JSONObject(json);
         JSONObject props = root.getJSONObject("properties");
 
-        double clay  = props.getJSONObject("clay").getDouble("mean");
-        double sand  = props.getJSONObject("sand").getDouble("mean");
-        double silt  = props.getJSONObject("silt").getDouble("mean");
-        double ph    = props.getJSONObject("phh2o").getDouble("mean");
+        double clay = props.getJSONObject("clay").getDouble("mean");
+        double sand = props.getJSONObject("sand").getDouble("mean");
+        double silt = props.getJSONObject("silt").getDouble("mean");
+        double ph   = props.getJSONObject("phh2o").getDouble("mean");
 
-        return classifySoilType(clay, sand, silt, ph, lat, lon);
+        return classifyByData(clay, sand, silt, ph, lat, lon);
     }
 
+    private String classifyByData(double clay, double sand, double silt, double ph, double lat, double lon) {
+        if (sand >= 65 && clay < 20) return "SANDY";
+        if (clay >= 40) return "CLAY";
+        if (clay >= 10 && clay <= 30 && sand >= 20 && sand <= 50 && silt >= 20 && silt <= 50) return "LOAMY";
+        if (ph >= 7.8) return "CALCAREOUS";
 
-    private String classifySoilType(
-            double clay, double sand, double silt, double ph,
-            double lat, double lon) {
+        return classifyFallbackSoilType(lat, lon);
+    }
 
-        // 1) Sandy: لو الرمل ≥ 65% والـ clay قليل < 20%
-        if (sand >= 65 && clay < 20) {
-            return "SANDY";  // تربة رملية
+    private String classifyFallbackSoilType(double lat, double lon) {
+        // مناطق غزة والساحل (رملية ساحلية أو كلسية)
+        if (lat >= 31.2 && lat <= 32.4 && lon >= 34.2 && lon <= 34.6) {
+            return "ARENOSOLIC"; // تربة رملية
         }
 
-        // 2) Clay: لو الطين ≥ 40%
-        if (clay >= 40) {
-            return "CLAY";   // تربة طينية
-        }
-
-        // 3) Loamy: مزيج متوازن (طين 10–30، رمل 20–50، طمي 20–50)
-        if (clay >= 10 && clay <= 30 &&
-            sand >= 20 && sand <= 50 &&
-            silt >= 20 && silt <= 50) {
-            return "LOAMY";  // تربة طميية
-        }
-
-        // 4) Calcareous: تربة جيرية، لو pH ≥ 7.8 (قلوية عالية)
-        if (ph >= 7.8) {
-            return "CALCAREOUS";  // تربة جيرية
-        }
-
-        // 5) Terra Rossa (تربة حمراء):
-        // مناطق الجبال الوسطى بفلسطين: lat 31.4–32.5, lon 34.8–35.4
-        if (lat >= 31.4 && lat <= 32.5 &&
-            lon >= 34.8 && lon <= 35.4) {
+        // سهول طولكرم، قلقيلية، طوباس
+        if (lat >= 32.2 && lat <= 32.4 && lon >= 34.8 && lon <= 35.3) {
             return "TERRA_ROSSA"; // تربة حمراء
         }
 
-        // 6) Basaltic (تربة بازلتية):
-        // مناطق الشمال الشرقي (بساطين / الجليل): lat 32.3–33.5, lon 35.4–35.8
-        if (lat >= 32.3 && lat <= 33.5 &&
-            lon >= 35.4 && lon <= 35.8) {
-            return "BASALTIC";    // تربة بازلتية
+        // جبال الضفة الغربية (نابلس، رام الله، الخليل، القدس)
+        if (lat >= 31.3 && lat <= 32.5 && lon >= 34.8 && lon <= 35.4) {
+            return "RENDZINA"; // تربة رقيقة كلسية
         }
 
-        // إذا ما انطبق شيء، نرجع Mixed
-        return "MIXED";  // تربة مختلطة
+        // المنحدرات الشرقية (بيت لحم الشرقية، شرق نابلس)
+        if (lat >= 31.5 && lat <= 32.3 && lon >= 35.3 && lon <= 35.5) {
+            return "GREY_CALCAREOUS_STEPPE"; // تربة رمادية كلسية
+        }
+
+        // الأغوار وأريحا
+        if (lat >= 31.7 && lat <= 32.3 && lon >= 35.4 && lon <= 35.6) {
+            return "REGOSOL"; // تربة رملية نهرية
+        }
+
+        // مناطق مالحة في الأغوار (قريبة من البحر الميت)
+        if (lat >= 31.3 && lat <= 31.6 && lon >= 35.4 && lon <= 35.6) {
+            return "SOLONCHAK"; // تربة ملحية
+        }
+
+        // الجليل الأعلى وبقعة بيسان
+        if (lat >= 32.6 && lat <= 33.3 && lon >= 35.4 && lon <= 35.8) {
+            return "BASALTIC"; // تربة بازلتية
+        }
+
+        // النقب، جنوب الخليل، مناطق صحراوية
+        if (lat <= 31.3 && lon <= 35.0) {
+            return "SANDY_REGOSOL"; // تربة رملية جافة
+        }
+
+        return "MIXED"; // fallback إذا مش معروف
     }
 }
