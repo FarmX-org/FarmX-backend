@@ -60,20 +60,18 @@ public class PlantedCropService {
 
         LocalDate plantedDate = dto.getPlantedDate() != null ? dto.getPlantedDate() : LocalDate.now();
         plantedCrop.setPlantedDate(plantedDate);
-
-        // حسب موعد الحصاد التقديري بناءً على plantedDate و growthDays
-        LocalDate estimatedHarvestDate = plantedDate.plusDays(crop.getGrowthDays());
-        plantedCrop.setEstimatedHarvestDate(estimatedHarvestDate);
-
+        plantedCrop.setEstimatedHarvestDate(plantedDate.plusDays(crop.getGrowthDays()));
         plantedCrop.setActualHarvestDate(dto.getActualHarvestDate());
         plantedCrop.setQuantity(dto.getQuantity());
         plantedCrop.setAvailable(dto.isAvailable());
         plantedCrop.setNotes(dto.getNotes());
         plantedCrop.setStatus(dto.getStatus());
         plantedCrop.setImageUrl(dto.getImageUrl());
-
-        // آخر مرة تسميد - جديد ما في، خلينا null أو حسب dto لو عندك
         plantedCrop.setFertilizedAt(dto.getFertilizedAt());
+        
+        // Compute fertilization flag
+        dto.setNeedsFertilization(needsFertilization(dto));
+        plantedCrop.setNeedsFertilization(dto.isNeedsFertilization());
 
         PlantedCrop saved = plantedCropRepository.save(plantedCrop);
         dto.setId(saved.getId());
@@ -107,8 +105,11 @@ public class PlantedCropService {
             dto.setNotes(pc.getNotes());
             dto.setStatus(pc.getStatus());
             dto.setImageUrl(pc.getImageUrl());
+            dto.setFertilizedAt(pc.getFertilizedAt());
+            dto.setNeedsFertilization(needsFertilization(dto));
             return dto;
         }).collect(Collectors.toList());
+
     }
     public PlantedCropDTO updatePlantedCrop(Long id, PlantedCropDTO dto, Principal principal) {
         String username = principal.getName();
@@ -201,9 +202,12 @@ public class PlantedCropService {
             dto.setStatus(pc.getStatus());
             dto.setImageUrl(pc.getImageUrl());
             dto.setFarmName(pc.getFarm().getName());
-            dto.setFarmerName(pc.getFarm().getFarmer().getName()); 
+            dto.setFarmerName(pc.getFarm().getFarmer().getName());
+            dto.setFertilizedAt(pc.getFertilizedAt());
+            dto.setNeedsFertilization(needsFertilization(dto));
             return dto;
         }).collect(Collectors.toList());
+
     }
 
     public List<FarmCropsDTO> getAllCropsByFarmer(Principal principal) {
@@ -230,8 +234,12 @@ public class PlantedCropService {
                     dto.setNotes(pc.getNotes());
                     dto.setStatus(pc.getStatus());
                     dto.setImageUrl(pc.getImageUrl());
+                    dto.setFertilizedAt(pc.getFertilizedAt());
+                    dto.setNeedsFertilization(needsFertilization(dto));
+
                     return dto;
                 }).collect(Collectors.toList());
+            
 
             return new FarmCropsDTO(farm.getId(), farm.getName(), cropsDtos);
         }).collect(Collectors.toList());
@@ -251,9 +259,10 @@ public class PlantedCropService {
             throw new AccessDeniedException("You don't own this planted crop");
         }
 
-        existing.setFertilizedAt(java.time.LocalDateTime.now());
-
+        existing.setFertilizedAt(LocalDateTime.now());
+        existing.setNeedsFertilization(false);
         plantedCropRepository.save(existing);
+
     }
 
     public boolean needsFertilization(PlantedCropDTO dto) {
@@ -303,7 +312,9 @@ public class PlantedCropService {
         dto.setNotes(pc.getNotes());
         dto.setStatus(pc.getStatus());
         dto.setImageUrl(pc.getImageUrl());
-        dto.setFertilizedAt(pc.getFertilizedAt()); // مهم!
+        dto.setFertilizedAt(pc.getFertilizedAt());
+        dto.setNeedsFertilization(needsFertilization(dto));
+
 
         return dto;
     }

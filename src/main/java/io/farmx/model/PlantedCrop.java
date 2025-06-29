@@ -20,7 +20,17 @@ public class PlantedCrop {
     @JoinColumn(name = "farm_id", nullable = false)
     private Farm farm;
 
-    
+    @Column(nullable = false)
+    private boolean needsFertilization = false;
+
+    public boolean isNeedsFertilization() {
+        return needsFertilization;
+    }
+
+    public void setNeedsFertilization(boolean needsFertilization) {
+        this.needsFertilization = needsFertilization;
+    }
+
     private LocalDate plantedDate;
 
     private LocalDate estimatedHarvestDate;
